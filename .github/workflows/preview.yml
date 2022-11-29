@@ -35,6 +35,10 @@ jobs:
         run:
           pytest tests
 
+      - name: test with mypy
+        run:
+          mypy slist
+
       - name: Build wheels and source tarball
         run: |
           poetry version $(poetry version --short)-dev.$GITHUB_RUN_NUMBER
