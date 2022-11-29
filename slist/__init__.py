@@ -447,11 +447,10 @@ class Slist(List[A]):
             output.append(self[i : i + size])
         return output
 
-    @property
-    def distinct(self: "Slist[CanHash]") -> "Slist[CanHash]":
+    def distinct_unsafe(self: "Slist[CanHash]") -> "Slist[CanHash]":
         """Deduplicates items. Preserves order.
         Mypy does not typecheck properly until https://github.com/python/mypy/issues/11167 is resolved
-        use distinct_by(lambda x: x) for a version that properly typechecks"""
+        use distinct_by(lambda x: x) for a safe version that properly typechecks"""
         seen = set()
         output = Slist[CanHash]()
         for item in self:
