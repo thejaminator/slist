@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import concurrent.futures
 import random
 import re
@@ -7,6 +8,8 @@ import statistics
 import typing
 from functools import reduce
 from typing import *
+
+import pytest
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -76,9 +79,7 @@ class Slist(List[A]):
                 new_list.append(item)
         return new_list
 
-    def filter_text_search(
-        self, key: Callable[[A], str], search: List[str]
-    ) -> "Slist[A]":
+    def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> "Slist[A]":
         """Filters a list of text with text terms"""
 
         def matches_search(text: str) -> bool:
@@ -259,9 +260,7 @@ class Slist(List[A]):
         ...
 
     @overload
-    def zip(
-        self, __second: Sequence[B], __third: Sequence[C], __fourth: Sequence[D]
-    ) -> Slist[Tuple[A, B, C, D]]:
+    def zip(self, __second: Sequence[B], __third: Sequence[C], __fourth: Sequence[D]) -> Slist[Tuple[A, B, C, D]]:
         ...
 
     @overload
@@ -278,16 +277,12 @@ class Slist(List[A]):
         # raise errors if all args are not the same length
         for arg in all_args:
             if len(arg) != len(self):
-                raise TypeError(
-                    f"Zipping with two different length sequences. {len(self)} != {len(arg)}"
-                )
+                raise TypeError(f"Zipping with two different length sequences. {len(self)} != {len(arg)}")
         return Slist(zip(self, *all_args))
 
     def slice_with_bool(self, bools: Sequence[B]) -> "Slist[A]":
         """Gets elements of the list with a sequence of booleans that are of the same length"""
-        return self.zip(bools).flat_map_option(
-            lambda tup: tup[0] if tup[1] is True else None
-        )
+        return self.zip(bools).flat_map_option(lambda tup: tup[0] if tup[1] is True else None)
 
     def find_one_or_raise(
         self,
@@ -361,9 +356,7 @@ class Slist(List[A]):
                 new.append(x)
         return new
 
-    def sort_by(
-        self, key: Callable[[A], CanCompare], reverse: bool = False
-    ) -> "Slist[A]":
+    def sort_by(self, key: Callable[[A], CanCompare], reverse: bool = False) -> "Slist[A]":
         new = self.copy()
         return Slist(sorted(new, key=key, reverse=reverse))
 
@@ -393,9 +386,7 @@ class Slist(List[A]):
                 non_dupes.append(item)
                 dupes_tracker.add(dupe_key)
 
-        return non_dupes.sort_by(key=sort_key, reverse=reverse) + dupes.sort_by(
-            key=sort_key, reverse=reverse
-        )
+        return non_dupes.sort_by(key=sort_key, reverse=reverse) + dupes.sort_by(key=sort_key, reverse=reverse)
 
     def shuffle_with_penalise_duplicates(
         self,
@@ -493,18 +484,20 @@ class Slist(List[A]):
             raise ValueError(f"Slist is not distinct {self}")
         return distinct[0]
 
-    def par_map(
-        self, func: Callable[[A], B], executor: concurrent.futures.Executor
-    ) -> "Slist[B]":
+    def par_map(self, func: Callable[[A], B], executor: concurrent.futures.Executor) -> "Slist[B]":
         """Applies the function to each element using the specified executor. Awaits for all results.
         If executor is ProcessPoolExecutor, make sure the function passed is pickable, e.g. no lambda functions"""
-        futures: List[concurrent.futures._base.Future[B]] = [
-            executor.submit(func, item) for item in self
-        ]
+        futures: List[concurrent.futures._base.Future[B]] = [executor.submit(func, item) for item in self]
         results = []
         for fut in futures:
             results.append(fut.result())
         return Slist(results)
+
+    async def par_map_async(
+        self, func: Callable[[A], Awaitable[B]], loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> "Slist[B]":
+        """Applies the async function to each element. Awaits for all results."""
+        return Slist(await asyncio.gather(*[func(item) for item in self], loop=loop))
 
     def mk_string(self: "Slist[str]", sep: str) -> str:
         return sep.join(self)
@@ -554,11 +547,7 @@ class Slist(List[A]):
         Returns empty list when the list is empty"""
         mean = self.average()
         sd = self.standard_deviation()
-        return (
-            Slist((x - mean) / sd for x in self)
-            if mean is not None and sd is not None
-            else Slist()
-        )
+        return Slist((x - mean) / sd for x in self) if mean is not None and sd is not None else Slist()
 
     def fold_left(self, acc: B, func: Callable[[B, A], B]) -> B:
         return reduce(func, self, acc)

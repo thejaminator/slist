@@ -73,3 +73,11 @@ def test_take_until_inclusive():
     assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 3) == Slist([1, 2, 3])
     assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 4) == Slist([1, 2, 3])
     assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 5) == Slist([1, 2, 3])
+
+@pytest.mark.asyncio
+async def test_par_map_async():
+    async def func(x):
+        return x * 2
+
+    result = await Slist([1, 2, 3]).par_map_async(func)
+    assert result == Slist([2, 4, 6])
