@@ -37,11 +37,11 @@ class Comparable(Protocol):
 
 class Slist(List[A]):
     @staticmethod
-    def one(element: A) -> "Slist[A]":
+    def one(element: A) -> Slist[A]:
         return Slist([element])
 
     @staticmethod
-    def one_option(element: Optional[A]) -> "Slist[A]":
+    def one_option(element: Optional[A]) -> Slist[A]:
         """Returns a list with one element, or an empty slist if the element is None
         Equal to Slist.one(element).flatten_option()"""
         return Slist([element]) if element is not None else Slist()
@@ -58,7 +58,7 @@ class Slist(List[A]):
                 return False
         return True
 
-    def filter(self, predicate: Callable[[A], bool]) -> "Slist[A]":
+    def filter(self, predicate: Callable[[A], bool]) -> Slist[A]:
         return Slist(filter(predicate, self))
 
     def upsample_if(self, predicate: Callable[[A], bool], upsample_by: int) -> Slist[A]:
@@ -73,7 +73,7 @@ class Slist(List[A]):
                 new_list.append(item)
         return new_list
 
-    def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> "Slist[A]":
+    def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> Slist[A]:
         """Filters a list of text with text terms"""
 
         def matches_search(text: str) -> bool:
@@ -85,42 +85,42 @@ class Slist(List[A]):
 
         return self.filter(predicate=lambda item: matches_search(key(item)))
 
-    def flatten_option(self: "Slist[Optional[B]]") -> "Slist[B]":
+    def flatten_option(self: Slist[Optional[B]]) -> Slist[B]:
         return Slist([item for item in self if item is not None])
 
-    def flat_map_option(self, func: Callable[[A], Optional[B]]) -> "Slist[B]":
+    def flat_map_option(self, func: Callable[[A], Optional[B]]) -> Slist[B]:
         """Runs the provided function, and filters out the Nones"""
         return self.map(func).flatten_option()
 
     # Overloads needed or make A covariant
     @overload
-    def flatten_list(self: "Slist[Slist[B]]") -> "Slist[B]":
+    def flatten_list(self: Slist[Slist[B]]) -> Slist[B]:
         ...
 
     @overload
-    def flatten_list(self: "Slist[List[B]]") -> "Slist[B]":
+    def flatten_list(self: Slist[List[B]]) -> Slist[B]:
         ...
 
-    def flatten_list(self: "Slist[List[B]]") -> "Slist[B]":
+    def flatten_list(self: Slist[List[B]]) -> Slist[B]:
         flat_list: Slist[B] = Slist()
         for sublist in self:
             for item in sublist:
                 flat_list.append(item)
         return flat_list
 
-    def enumerated(self) -> "Slist[Tuple[int, A]]":
+    def enumerated(self) -> Slist[Tuple[int, A]]:
         return Slist(enumerate(self))
 
-    def map(self, func: Callable[[A], B]) -> "Slist[B]":
+    def map(self, func: Callable[[A], B]) -> Slist[B]:
         return Slist(func(item) for item in self)
 
-    def map_2(self: Slist[Tuple[B, C]], func: Callable[[B, C], D]) -> "Slist[D]":
+    def map_2(self: Slist[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
         return Slist(func(b, c) for b, c in self)
 
-    def map_enumerate(self, func: Callable[[int, A], B]) -> "Slist[B]":
+    def map_enumerate(self, func: Callable[[int, A], B]) -> Slist[B]:
         return Slist(func(idx, item) for idx, item in enumerate(self))
 
-    def shuffle(self, seed: Optional[str] = None) -> "Slist[A]":
+    def shuffle(self, seed: Optional[str] = None) -> Slist[A]:
         new = self.copy()
         random.Random(seed).shuffle(new)
         return Slist(new)  # shuffle makes it back into a list instead of Slist
@@ -135,13 +135,13 @@ class Slist(List[A]):
         else:
             return random.Random(seed).choice(self)
 
-    def sample(self, n: int, seed: Optional[str] = None) -> "Slist[A]":
+    def sample(self, n: int, seed: Optional[str] = None) -> Slist[A]:
         if n < self.length:
             return Slist(random.Random(seed).sample(self, n))
         else:
             return self.copy()
 
-    def for_each(self, func: Callable[[A], None]) -> "Slist[A]":
+    def for_each(self, func: Callable[[A], None]) -> Slist[A]:
         """Runs an effect on each element, and returns the original list
         e.g. Slist([1,2,3]).foreach(print)"""
         for item in self:
@@ -175,7 +175,7 @@ class Slist(List[A]):
     def from_dict(a_dict: Dict[CanHash, A]) -> Slist[Tuple[CanHash, A]]:
         return Slist(tup for tup in a_dict.items())
 
-    def for_each_enumerate(self, func: Callable[[int, A], None]) -> "Slist[A]":
+    def for_each_enumerate(self, func: Callable[[int, A], None]) -> Slist[A]:
         """Runs an effect on each element, and returns the original list
         e.g. Slist([1,2,3]).foreach(print)"""
         for idx, item in enumerate(self):
@@ -274,7 +274,7 @@ class Slist(List[A]):
                 raise TypeError(f"Zipping with two different length sequences. {len(self)} != {len(arg)}")
         return Slist(zip(self, *all_args))
 
-    def slice_with_bool(self, bools: Sequence[B]) -> "Slist[A]":
+    def slice_with_bool(self, bools: Sequence[B]) -> Slist[A]:
         """Gets elements of the list with a sequence of booleans that are of the same length"""
         return self.zip(bools).flat_map_option(lambda tup: tup[0] if tup[1] is True else None)
 
@@ -324,10 +324,10 @@ class Slist(List[A]):
         else:
             raise exception
 
-    def take(self, n: int) -> "Slist[A]":
+    def take(self, n: int) -> Slist[A]:
         return Slist(self[:n])
 
-    def take_until_exclusive(self, predicate: Callable[[A], bool]) -> "Slist[A]":
+    def take_until_exclusive(self, predicate: Callable[[A], bool]) -> Slist[A]:
         """Takes the first elements until the predicate is true.
         Does not include the element that caused the predicate to return true."""
         new: Slist[A] = Slist()
@@ -338,7 +338,7 @@ class Slist(List[A]):
                 new.append(x)
         return new
 
-    def take_until_inclusive(self, predicate: Callable[[A], bool]) -> "Slist[A]":
+    def take_until_inclusive(self, predicate: Callable[[A], bool]) -> Slist[A]:
         """Takes the first elements until the predicate is true.
         Includes the element that caused the predicate to return true."""
         new: Slist[A] = Slist()
@@ -350,11 +350,11 @@ class Slist(List[A]):
                 new.append(x)
         return new
 
-    def sort_by(self, key: Callable[[A], CanCompare], reverse: bool = False) -> "Slist[A]":
+    def sort_by(self, key: Callable[[A], CanCompare], reverse: bool = False) -> Slist[A]:
         new = self.copy()
         return Slist(sorted(new, key=key, reverse=reverse))
 
-    def sorted(self: "Slist[CanCompare]", reverse: bool = False) -> "Slist[CanCompare]":
+    def sorted(self: Slist[CanCompare], reverse: bool = False) -> Slist[CanCompare]:
         return self.sort_by(key=identity, reverse=reverse)
 
     def reversed(self) -> Slist[A]:
@@ -366,7 +366,7 @@ class Slist(List[A]):
         sort_key: Callable[[A], CanCompare],
         duplicate_key: Callable[[A], CanHash],
         reverse: bool = False,
-    ) -> "Slist[A]":
+    ) -> Slist[A]:
         """Sort on a given sort key, but penalises duplicate_key such that they will be at the back of the list
         # >>> Slist([6, 5, 4, 3, 2, 1, 1, 1]).sort_by_penalise_duplicates(sort_key=identity, duplicate_key=identity)
         [1, 2, 3, 4, 5, 6, 1, 1]
@@ -389,7 +389,7 @@ class Slist(List[A]):
         self,
         duplicate_key: Callable[[A], CanHash],
         seed: Optional[str] = None,
-    ) -> "Slist[A]":
+    ) -> Slist[A]:
         """Shuffle, but penalises duplicate_key such that they will be at the back of the list
         # >>> Slist([6, 5, 4, 3, 2, 2, 1, 1, 1]).shuffle_by_penalise_duplicates(duplicate_key=identity)
         [6, 4, 1, 3, 5, 2, 1, 2, 1]
@@ -409,13 +409,13 @@ class Slist(List[A]):
 
         return non_dupes.shuffle(seed) + dupes.shuffle(seed)
 
-    def __add__(self, other: "Slist[B]") -> "Slist[Union[A, B]]":  # type: ignore
+    def __add__(self, other: Slist[B]) -> Slist[Union[A, B]]:  # type: ignore
         return Slist(super().__add__(other))  # type: ignore
 
-    def add(self, other: "Slist[B]") -> "Slist[Union[A, B]]":
+    def add(self, other: Slist[B]) -> Slist[Union[A, B]]:
         return self + other  # type: ignore
 
-    def add_one(self, other: B) -> "Slist[Union[A, B]]":
+    def add_one(self, other: B) -> Slist[Union[A, B]]:
         new: Slist[Union[A, B]] = self.copy()  # type: ignore
         new.append(other)
         return new
@@ -425,23 +425,23 @@ class Slist(List[A]):
         pass
 
     @overload
-    def __getitem__(self, i: slice) -> "Slist[A]":
+    def __getitem__(self, i: slice) -> Slist[A]:
         pass
 
-    def __getitem__(self, i: Union[int, slice]) -> "Union[A, Slist[A]]":
+    def __getitem__(self, i: Union[int, slice]) -> Union[A, Slist[A]]:
         if isinstance(i, int):
             return super().__getitem__(i)
         else:
             return Slist(super(Slist, self).__getitem__(i))
 
-    def grouped(self, size: int) -> "Slist[Slist[A]]":
+    def grouped(self, size: int) -> Slist[Slist[A]]:
         """Groups the list into chunks of size `size`"""
         output = Slist[Slist[A]]()
         for i in range(0, self.length, size):
             output.append(self[i : i + size])
         return output
 
-    def distinct_unsafe(self: "Slist[CanHash]") -> "Slist[CanHash]":
+    def distinct_unsafe(self: Slist[CanHash]) -> Slist[CanHash]:
         """Deduplicates items. Preserves order.
         Mypy does not typecheck properly until https://github.com/python/mypy/issues/11167 is resolved
         use distinct_by(lambda x: x) for a safe version that properly typechecks"""
@@ -455,7 +455,7 @@ class Slist(List[A]):
                 output.append(item)
         return output
 
-    def distinct_by(self, key: Callable[[A], CanHash]) -> "Slist[A]":
+    def distinct_by(self, key: Callable[[A], CanHash]) -> Slist[A]:
         """Deduplicates a list by a key. Preserves order."""
         seen = set()
         output = Slist[A]()
@@ -480,7 +480,7 @@ class Slist(List[A]):
             raise ValueError(f"Slist is not distinct {self}")
         return distinct[0]
 
-    def par_map(self, func: Callable[[A], B], executor: concurrent.futures.Executor) -> "Slist[B]":
+    def par_map(self, func: Callable[[A], B], executor: concurrent.futures.Executor) -> Slist[B]:
         """Applies the function to each element using the specified executor. Awaits for all results.
         If executor is ProcessPoolExecutor, make sure the function passed is pickable, e.g. no lambda functions"""
         futures: List[concurrent.futures._base.Future[B]] = [executor.submit(func, item) for item in self]
@@ -491,54 +491,54 @@ class Slist(List[A]):
 
     async def par_map_async(
         self, func: Callable[[A], Awaitable[B]], loop: Optional[asyncio.AbstractEventLoop] = None
-    ) -> "Slist[B]":
+    ) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
         return Slist(await asyncio.gather(*[func(item) for item in self], loop=loop))
 
-    def mk_string(self: "Slist[str]", sep: str) -> str:
+    def mk_string(self: Slist[str], sep: str) -> str:
         return sep.join(self)
 
     @overload
-    def sum(self: "Slist[int]") -> int:
+    def sum(self: Slist[int]) -> int:
         ...
 
     @overload
-    def sum(self: "Slist[float]") -> float:
+    def sum(self: Slist[float]) -> float:
         ...
 
     @overload
-    def sum(self: "Slist[bool]") -> int:
+    def sum(self: Slist[bool]) -> int:
         ...
 
     def sum(
-        self: "Slist[Union[int, float, bool]]",
+        self: Slist[Union[int, float, bool]],
     ) -> Union[int, float]:
         """Returns 0 when the list is empty"""
         return sum(self)
 
     @overload
-    def average(self: "Slist[int]") -> Optional[float]:
+    def average(self: Slist[int]) -> Optional[float]:
         ...
 
     @overload
-    def average(self: "Slist[float]") -> Optional[float]:
+    def average(self: Slist[float]) -> Optional[float]:
         ...
 
     @overload
-    def average(self: "Slist[bool]") -> Optional[float]:
+    def average(self: Slist[bool]) -> Optional[float]:
         ...
 
     def average(
-        self: "Slist[Union[int, float, bool]]",
+        self: Slist[Union[int, float, bool]],
     ) -> Optional[float]:
         """Returns None when the list is empty"""
         return self.sum() / self.length if self.length > 0 else None
 
-    def standard_deviation(self: "Slist[Union[int, float]]") -> Optional[float]:
+    def standard_deviation(self: Slist[Union[int, float]]) -> Optional[float]:
         """Returns None when the list is empty"""
         return statistics.stdev(self) if self.length > 0 else None
 
-    def standardize(self: "Slist[Union[int, float]]") -> "Slist[float]":
+    def standardize(self: Slist[Union[int, float]]) -> Slist[float]:
         """standardize to mean 0, sd 1
         Returns empty list when the list is empty"""
         mean = self.average()
@@ -548,7 +548,7 @@ class Slist(List[A]):
     def fold_left(self, acc: B, func: Callable[[B, A], B]) -> B:
         return reduce(func, self, acc)
 
-    def split_by(self, predicate: Callable[[A], bool]) -> "Tuple[Slist[A], Slist[A]]":
+    def split_by(self, predicate: Callable[[A], bool]) -> Tuple[Slist[A], Slist[A]]:
         """Splits the list into two lists based on the predicate"""
         left = Slist[A]()
         right = Slist[A]()
@@ -559,7 +559,7 @@ class Slist(List[A]):
                 right.append(item)
         return left, right
 
-    def split_proportion(self, left_proportion: float) -> "Tuple[Slist[A], Slist[A]]":
+    def split_proportion(self, left_proportion: float) -> Tuple[Slist[A], Slist[A]]:
         """Splits the list into two lists based on the left_proportion. 0 < left_proportion < 1"""
         assert 0 < left_proportion < 1, "left_proportion needs to be between 0 and 1"
         left = Slist[A]()
@@ -571,7 +571,7 @@ class Slist(List[A]):
                 right.append(item)
         return left, right
 
-    def split_into_n(self, n: int) -> "Slist[Slist[A]]":
+    def split_into_n(self, n: int) -> Slist[Slist[A]]:
         """Splits the list into n lists of roughly equal size"""
         assert n > 0, "n needs to be greater than 0"
         output = Slist[Slist[A]]()
