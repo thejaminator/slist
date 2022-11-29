@@ -1,12 +1,11 @@
 # Slist
-
 A spruced up version of the built-in python list.
 
 More post fixed methods for lovely chaining!
 
-All these methods return a new list. They do not mutate the original list.
-
 Leverage the latest mypy features to spot errors during coding.
+
+All these methods return a new list. They do not mutate the original list.
 
 
 [![pypi](https://img.shields.io/pypi/v/slist.svg)](https://pypi.org/project/slist)
@@ -16,8 +15,6 @@ Leverage the latest mypy features to spot errors during coding.
 ```
 pip install slist
 ```
-
-Immutable list replacement for python. With postfix methods for easy functional programming.
 
 
 * GitHub: <https://github.com/thejaminator/slist>
