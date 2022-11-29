@@ -77,7 +77,6 @@ class Slist(List[A]):
         """Runs the provided function, and filters out the Nones"""
         return self.map(func).flatten_option()
 
-
     def upsample_if(self, predicate: Callable[[A], bool], upsample_by: int) -> Slist[A]:
         """Upsamples the list by the given factor if the predicate is true"""
         assert upsample_by > 0
@@ -90,16 +89,7 @@ class Slist(List[A]):
                 new_list.append(item)
         return new_list
 
-    # Overloads needed or make A covariant
-    @overload
-    def flatten_list(self: Slist[Slist[B]]) -> Slist[B]:
-        ...
-
-    @overload
-    def flatten_list(self: Slist[List[B]]) -> Slist[B]:
-        ...
-
-    def flatten_list(self: Slist[List[B]]) -> Slist[B]:
+    def flatten_list(self: Sequence[Sequence[B]]) -> Slist[B]:
         flat_list: Slist[B] = Slist()
         for sublist in self:
             for item in sublist:
