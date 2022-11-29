@@ -61,6 +61,23 @@ class Slist(List[A]):
     def filter(self, predicate: Callable[[A], bool]) -> Slist[A]:
         return Slist(filter(predicate, self))
 
+    def map(self, func: Callable[[A], B]) -> Slist[B]:
+        return Slist(func(item) for item in self)
+
+    def map_2(self: Slist[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
+        return Slist(func(b, c) for b, c in self)
+
+    def map_enumerate(self, func: Callable[[int, A], B]) -> Slist[B]:
+        return Slist(func(idx, item) for idx, item in enumerate(self))
+
+    def flatten_option(self: Slist[Optional[B]]) -> Slist[B]:
+        return Slist([item for item in self if item is not None])
+
+    def flat_map_option(self, func: Callable[[A], Optional[B]]) -> Slist[B]:
+        """Runs the provided function, and filters out the Nones"""
+        return self.map(func).flatten_option()
+
+
     def upsample_if(self, predicate: Callable[[A], bool], upsample_by: int) -> Slist[A]:
         """Upsamples the list by the given factor if the predicate is true"""
         assert upsample_by > 0
@@ -72,25 +89,6 @@ class Slist(List[A]):
             else:
                 new_list.append(item)
         return new_list
-
-    def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> Slist[A]:
-        """Filters a list of text with text terms"""
-
-        def matches_search(text: str) -> bool:
-            if search:
-                search_regex = re.compile("|".join(search), re.IGNORECASE)
-                return bool(re.search(search_regex, text))
-            else:
-                return True  # No filter if search undefined
-
-        return self.filter(predicate=lambda item: matches_search(key(item)))
-
-    def flatten_option(self: Slist[Optional[B]]) -> Slist[B]:
-        return Slist([item for item in self if item is not None])
-
-    def flat_map_option(self, func: Callable[[A], Optional[B]]) -> Slist[B]:
-        """Runs the provided function, and filters out the Nones"""
-        return self.map(func).flatten_option()
 
     # Overloads needed or make A covariant
     @overload
@@ -110,15 +108,6 @@ class Slist(List[A]):
 
     def enumerated(self) -> Slist[Tuple[int, A]]:
         return Slist(enumerate(self))
-
-    def map(self, func: Callable[[A], B]) -> Slist[B]:
-        return Slist(func(item) for item in self)
-
-    def map_2(self: Slist[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
-        return Slist(func(b, c) for b, c in self)
-
-    def map_enumerate(self, func: Callable[[int, A], B]) -> Slist[B]:
-        return Slist(func(idx, item) for idx, item in enumerate(self))
 
     def shuffle(self, seed: Optional[str] = None) -> Slist[A]:
         new = self.copy()
@@ -494,6 +483,18 @@ class Slist(List[A]):
     ) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
         return Slist(await asyncio.gather(*[func(item) for item in self], loop=loop))
+
+    def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> Slist[A]:
+        """Filters a list of text with text terms"""
+
+        def matches_search(text: str) -> bool:
+            if search:
+                search_regex = re.compile("|".join(search), re.IGNORECASE)
+                return bool(re.search(search_regex, text))
+            else:
+                return True  # No filter if search undefined
+
+        return self.filter(predicate=lambda item: matches_search(key(item)))
 
     def mk_string(self: Slist[str], sep: str) -> str:
         return sep.join(self)
