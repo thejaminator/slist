@@ -1,7 +1,7 @@
 # Slist
 A spruced up version of the built-in python list.
 
-More post fixed methods for lovely chaining!
+More post-fixed methods for lovely chaining!
 
 Leverage the latest mypy features to spot errors during coding.
 
