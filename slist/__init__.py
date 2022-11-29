@@ -625,14 +625,14 @@ class Slist(List[A]):
                     else:
                         new.append(item)
 
-    def unsafe_repeat_until_size(self, size: int) -> Slist[A]:
+    def repeat_until_size_or_raise(self, size: int) -> Slist[A]:
         """
         Repeats the list until it reaches the specified size
-        >>> Slist(1, 2, 3).unsafe_repeat_until_size(5)
+        >>> Slist(1, 2, 3).repeat_until_size_or_raise(5)
         Slist(1, 2, 3, 1, 2)
 
         Returns a truncated list if the list is longer than the specified size
-        >>> Slist(1, 2, 3).unsafe_repeat_until_size(2)
+        >>> Slist(1, 2, 3).repeat_until_size_or_raise(2)
         Slist(1, 2)
 
         Has assertion that input Slist is not empty
