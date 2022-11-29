@@ -9,8 +9,6 @@ import typing
 from functools import reduce
 from typing import *
 
-import pytest
-
 A = TypeVar("A")
 B = TypeVar("B")
 C = TypeVar("C")
@@ -38,10 +36,6 @@ class Comparable(Protocol):
 
 
 class Slist(List[A]):
-    @staticmethod
-    def of(iterable: Iterable[A]) -> "Slist[A]":
-        return Slist(iterable)
-
     @staticmethod
     def one(element: A) -> "Slist[A]":
         return Slist([element])

@@ -32,7 +32,7 @@ else:
                     raise ValueError(f"Error validating {item}, Error: {error}")
 
                 validated_values.append(valid_value)
-            return Slist.of(validated_values)
+            return Slist(validated_values)
 
     # Pycharm doesn't check if TYPE_CHECKING so we do this hack
     SlistPydantic = cast(Slist, SlistPydanticImpl)
