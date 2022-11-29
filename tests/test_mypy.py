@@ -1,8 +1,10 @@
 from typing import List
 
+import pytest
+
 from slist import Slist
 
-
+@pytest.mark.skip
 def test_flatten_list():
     nested: Slist[List[int]] = Slist([[10]])
     test: Slist[int] = nested.flatten_list()  # ok

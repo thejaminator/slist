@@ -20,12 +20,8 @@ def test_split_proportion():
 
 def test_repeat_until_size():
     assert Slist([]).repeat_until_size(5) is None, "should give back empty list"
-    assert Slist([1, 2, 3]).repeat_until_size(5) == Slist(
-        [1, 2, 3, 1, 2]
-    ), "should repeat 1 and 2"
-    assert Slist([1, 2, 3, 4, 5, 6]).repeat_until_size(5) == Slist(
-        [1, 2, 3, 4, 5]
-    ), "should be truncated"
+    assert Slist([1, 2, 3]).repeat_until_size(5) == Slist([1, 2, 3, 1, 2]), "should repeat 1 and 2"
+    assert Slist([1, 2, 3, 4, 5, 6]).repeat_until_size(5) == Slist([1, 2, 3, 4, 5]), "should be truncated"
 
 
 def test_split_by():
@@ -53,12 +49,10 @@ def test_find_last_idx_or_raise():
 
 def test_zip():
     assert Slist([]).zip(Slist([])) == Slist([])
-    assert Slist([1, 2, 3]).zip(Slist(["1", "2", "3"])) == Slist(
-        [(1, "1"), (2, "2"), (3, "3")]
+    assert Slist([1, 2, 3]).zip(Slist(["1", "2", "3"])) == Slist([(1, "1"), (2, "2"), (3, "3")])
+    assert Slist([1, 2, 3]).zip(Slist(["1", "2", "3"]), Slist([True, True, True])) == Slist(
+        [(1, "1", True), (2, "2", True), (3, "3", True)]
     )
-    assert Slist([1, 2, 3]).zip(
-        Slist(["1", "2", "3"]), Slist([True, True, True])
-    ) == Slist([(1, "1", True), (2, "2", True), (3, "3", True)])
 
     with pytest.raises(TypeError):
         Slist([1, 2, 3]).zip(Slist(["1"]))
@@ -74,6 +68,7 @@ def test_take_until_inclusive():
     assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 4) == Slist([1, 2, 3])
     assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 5) == Slist([1, 2, 3])
 
+
 @pytest.mark.asyncio
 async def test_par_map_async():
     async def func(x):
@@ -81,3 +76,10 @@ async def test_par_map_async():
 
     result = await Slist([1, 2, 3]).par_map_async(func)
     assert result == Slist([2, 4, 6])
+
+
+def test_grouped():
+    test_list = Slist([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    assert test_list.grouped(2) == Slist([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]])
+    test_list_2 = Slist([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    assert test_list_2.grouped(2) == Slist([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11]])
