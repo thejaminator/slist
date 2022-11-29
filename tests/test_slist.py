@@ -83,3 +83,20 @@ def test_grouped():
     assert test_list.grouped(2) == Slist([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]])
     test_list_2 = Slist([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
     assert test_list_2.grouped(2) == Slist([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11]])
+
+
+def test_window():
+    test_list = Slist([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    assert test_list.window(size=1) == Slist([[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]])
+    assert test_list.window(size=2) == Slist([[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10]])
+
+
+def test_window_empty_list():
+    test_list = Slist([])
+    assert test_list.window(size=1) == Slist()
+    assert test_list.window(size=2) == Slist()
+
+
+def test_window_too_small_list():
+    test_list = Slist([1])
+    assert test_list.window(size=2) == Slist()

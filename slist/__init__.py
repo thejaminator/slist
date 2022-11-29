@@ -421,7 +421,15 @@ class Slist(List[A]):
         return output
 
     def window(self, size: int) -> Slist[Slist[A]]:
-        """Returns a list of lists of size `size`"""
+        """Returns a list of windows of size `size`
+        If the list is too small or empty, returns an empty list
+        Example:
+        >>> Slist([1, 2, 3, 4, 5]).window(3)
+        [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
+
+        >>> Slist([1]).window(2)
+        []
+        """
         output = Slist[Slist[A]]()
         for i in range(0, self.length - size + 1):
             output.append(self[i : i + size])
