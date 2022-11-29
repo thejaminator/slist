@@ -360,6 +360,9 @@ class Slist(List[A]):
         new = self.copy()
         return Slist(sorted(new, key=key, reverse=reverse))
 
+    def sorted(self: "Slist[CanCompare]", reverse: bool = False) -> "Slist[CanCompare]":
+        return self.sort_by(key=identity, reverse=reverse)
+
     def reversed(self) -> Slist[A]:
         """Returns a new list with the elements in reversed order"""
         return Slist(reversed(self))
@@ -624,7 +627,7 @@ class Slist(List[A]):
         >>> Slist(1, 2, 3).repeat_until_size_or_raise(2)
         Slist(1, 2)
 
-        Has assertion that input Slist is not empty
+        Throws an exception if the list is empty
         """
         assert size > 0, "size needs to be greater than 0"
         assert not self.is_empty, "input needs to be non empty"
