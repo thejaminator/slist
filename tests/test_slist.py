@@ -1,0 +1,75 @@
+import pytest
+
+from slist import Slist
+
+
+def test_split_proportion():
+    test_list = Slist([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    left, right = test_list.split_proportion(0.5)
+    assert left == Slist([1, 2, 3, 4, 5])
+    assert right == Slist([6, 7, 8, 9, 10])
+
+    left, right = test_list.split_proportion(0.25)
+    assert left == Slist([1, 2, 3])
+    assert right == Slist([4, 5, 6, 7, 8, 9, 10])
+
+    left, right = test_list.split_proportion(0.75)
+    assert left == Slist([1, 2, 3, 4, 5, 6, 7, 8])
+    assert right == Slist([9, 10])
+
+
+def test_repeat_until_size():
+    assert Slist([]).repeat_until_size(5) is None, "should give back empty list"
+    assert Slist([1, 2, 3]).repeat_until_size(5) == Slist(
+        [1, 2, 3, 1, 2]
+    ), "should repeat 1 and 2"
+    assert Slist([1, 2, 3, 4, 5, 6]).repeat_until_size(5) == Slist(
+        [1, 2, 3, 4, 5]
+    ), "should be truncated"
+
+
+def test_split_by():
+    assert Slist([]).split_by(lambda x: x % 2 == 0) == (
+        Slist([]),
+        Slist([]),
+    ), "should split an empty Slist correctly into two empty Slists"
+    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: x % 2 == 0) == (
+        Slist([2, 4]),
+        Slist([1, 3, 5]),
+    ), "should split a non-empty Slist correctly into two Slists"
+    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: True) == (
+        Slist([1, 2, 3, 4, 5]),
+        Slist([]),
+    ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
+    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: False) == (
+        Slist([]),
+        Slist([1, 2, 3, 4, 5]),
+    ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
+
+
+def test_find_last_idx_or_raise():
+    assert Slist([1, 1, 1, 1]).find_last_idx_or_raise(lambda x: x == 1) == 3
+
+
+def test_zip():
+    assert Slist([]).zip(Slist([])) == Slist([])
+    assert Slist([1, 2, 3]).zip(Slist(["1", "2", "3"])) == Slist(
+        [(1, "1"), (2, "2"), (3, "3")]
+    )
+    assert Slist([1, 2, 3]).zip(
+        Slist(["1", "2", "3"]), Slist([True, True, True])
+    ) == Slist([(1, "1", True), (2, "2", True), (3, "3", True)])
+
+    with pytest.raises(TypeError):
+        Slist([1, 2, 3]).zip(Slist(["1"]))
+    with pytest.raises(TypeError):
+        Slist([1, 2, 3]).zip(Slist(["1", "2", "3"]), Slist(["1"]))
+
+
+def test_take_until_inclusive():
+    assert Slist([]).take_until_inclusive(lambda x: x == 1) == Slist([])
+    assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 1) == Slist([1])
+    assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 2) == Slist([1, 2])
+    assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 3) == Slist([1, 2, 3])
+    assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 4) == Slist([1, 2, 3])
+    assert Slist([1, 2, 3]).take_until_inclusive(lambda x: x == 5) == Slist([1, 2, 3])
