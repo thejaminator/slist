@@ -420,6 +420,13 @@ class Slist(List[A]):
             output.append(self[i : i + size])
         return output
 
+    def window(self, size: int) -> Slist[Slist[A]]:
+        """Returns a list of lists of size `size`"""
+        output = Slist[Slist[A]]()
+        for i in range(0, self.length - size + 1):
+            output.append(self[i : i + size])
+        return output
+
     def distinct_unsafe(self: Slist[CanHash]) -> Slist[CanHash]:
         """Deduplicates items. Preserves order.
         Mypy does not typecheck properly until https://github.com/python/mypy/issues/11167 is resolved
@@ -472,7 +479,7 @@ class Slist(List[A]):
         self, func: Callable[[A], Awaitable[B]], loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
-        return Slist(await asyncio.gather(*[func(item) for item in self], loop=loop))
+        return Slist(await asyncio.gather(*[func(item) for item in self], loop=loop))  # type: ignore
 
     def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> Slist[A]:
         """Filters a list of text with text terms"""
