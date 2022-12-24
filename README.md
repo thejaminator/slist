@@ -1,5 +1,5 @@
 # Slist
-This is a drop in replaced for the built-in mutable python list.
+This is a drop in replacement for the built-in mutable python list
 
 But with more post-fixed methods for chaining in a typesafe manner!!
 
