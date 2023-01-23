@@ -1,7 +1,7 @@
 # Slist
-A spruced up version of the built-in mutable python list.
+This is a drop in replacement for the built-in mutable python list
 
-More post-fixed methods for lovely chaining!
+But with more post-fixed methods for chaining in a typesafe manner!!
 
 Leverage the latest mypy features to spot errors during coding.
 
