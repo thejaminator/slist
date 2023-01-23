@@ -161,7 +161,7 @@ class Slist(List[A]):
             func(idx, item)
         return self
 
-    def max_by(self, key: Callable[[A], CanCompare]) -> Optional[CanCompare]:
+    def max_by(self, key: Callable[[A], CanCompare]) -> Optional[A]:
         return max(self, key=key) if self.length > 0 else None
 
     def max_by_ordering(self, ordering: Callable[[A, A], bool]) -> Optional[A]:
@@ -172,7 +172,7 @@ class Slist(List[A]):
                     theMax = currentItem
         return theMax
 
-    def min_by(self, ordering: Callable[[A, A], bool]) -> Optional[A]:
+    def min_by(self, ordering: Callable[[A], CanCompare]) -> Optional[A]:
         return min(self, key=ordering) if self.length > 0 else None
 
     def min_by_ordering(self: Slist[CanCompare]) -> Optional[CanCompare]:
