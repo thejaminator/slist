@@ -161,7 +161,10 @@ class Slist(List[A]):
             func(idx, item)
         return self
 
-    def max_option(self, ordering: Callable[[A, A], bool]) -> Optional[A]:
+    def max_by(self, key: Callable[[A], CanCompare]) -> Optional[CanCompare]:
+        return max(self, key=key) if self.length > 0 else None
+
+    def max_by_ordering(self, ordering: Callable[[A, A], bool]) -> Optional[A]:
         theMax: Optional[A] = self.first_option
         for currentItem in self:
             if theMax is not None:
@@ -169,14 +172,17 @@ class Slist(List[A]):
                     theMax = currentItem
         return theMax
 
-    def min_option(self, ordering: Callable[[A, A], bool]) -> Optional[A]:
-        return self.max_option(ordering=lambda a, b: not ordering(a, b))
+    def min_by(self, ordering: Callable[[A, A], bool]) -> Optional[A]:
+        return min(self, key=ordering) if self.length > 0 else None
 
-    def get(self, index: int, orElse: B) -> Union[A, B]:
+    def min_by_ordering(self: Slist[CanCompare]) -> Optional[CanCompare]:
+        return min(self) if self else None
+
+    def get(self, index: int, or_else: B) -> Union[A, B]:
         try:
             return self.__getitem__(index)
         except IndexError:
-            return orElse
+            return or_else
 
     @property
     def is_empty(self) -> bool:
@@ -332,6 +338,22 @@ class Slist(List[A]):
     def sort_by(self, key: Callable[[A], CanCompare], reverse: bool = False) -> Slist[A]:
         new = self.copy()
         return Slist(sorted(new, key=key, reverse=reverse))
+
+    def percentile_by(self, key: Callable[[A], CanCompare], percentile: float) -> A:
+        """Gets the element at the given percentile"""
+        if percentile < 0 or percentile > 1:
+            raise ValueError(f"Percentile must be between 0 and 1. Got {percentile}")
+        if self.length == 0:
+            raise ValueError("Cannot get percentile of empty list")
+        result = self.sort_by(key).get(int(len(self) * percentile), None)
+        assert result is not None
+        return result
+
+    def median_by(self, key: Callable[[A], CanCompare]) -> A:
+        """Gets the median element"""
+        if self.length == 0:
+            raise ValueError("Cannot get median of empty list")
+        return self.percentile_by(key, 0.5)
 
     def sorted(self: Slist[CanCompare], reverse: bool = False) -> Slist[CanCompare]:
         return self.sort_by(key=identity, reverse=reverse)

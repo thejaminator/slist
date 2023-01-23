@@ -1,6 +1,6 @@
 import pytest
 
-from slist import Slist
+from slist import Slist, identity
 
 
 def test_split_proportion():
@@ -100,3 +100,26 @@ def test_window_empty_list():
 def test_window_too_small_list():
     test_list = Slist([1])
     assert test_list.window(size=2) == Slist()
+
+def test_median():
+    numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
+    assert numbers.median_by(identity) == 5
+
+def test_percentile():
+    numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
+    assert numbers.percentile_by(identity, 0.5) == 5
+    assert numbers.percentile_by(identity, 0.25) == 3
+    assert numbers.percentile_by(identity, 0.75) == 7
+
+
+def test_max_by():
+    numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
+    assert numbers.max_by(identity) == 9
+    empty = Slist([])
+    assert empty.max_by(identity) is None
+
+def test_min_by():
+    numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
+    assert numbers.min_by(identity) == 1
+    empty = Slist([])
+    assert empty.min_by(identity) is None
