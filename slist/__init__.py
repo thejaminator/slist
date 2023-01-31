@@ -5,9 +5,14 @@ import concurrent.futures
 import random
 import re
 import statistics
+import sys
 import typing
 from functools import reduce
 from typing import *
+
+if sys.version_info <= (3, 8):
+    # python 3.7 doesn't have Protocol in typing
+    from typing_extensions import Protocol
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -20,19 +25,19 @@ CanHash = TypeVar("CanHash", bound=Hashable)
 
 identity = lambda x: x
 
-if typing.TYPE_CHECKING: # for compat with python 3.7
-    class Comparable(Protocol):
-        def __lt__(self: CanCompare, other: CanCompare) -> bool:
-            pass
 
-        def __gt__(self: CanCompare, other: CanCompare) -> bool:
-            pass
+class Comparable(Protocol):
+    def __lt__(self: CanCompare, other: CanCompare) -> bool:
+        pass
 
-        def __le__(self: CanCompare, other: CanCompare) -> bool:
-            pass
+    def __gt__(self: CanCompare, other: CanCompare) -> bool:
+        pass
 
-        def __ge__(self: CanCompare, other: CanCompare) -> bool:
-            pass
+    def __le__(self: CanCompare, other: CanCompare) -> bool:
+        pass
+
+    def __ge__(self: CanCompare, other: CanCompare) -> bool:
+        pass
 
 
 class Slist(List[A]):
