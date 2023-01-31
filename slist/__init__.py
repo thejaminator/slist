@@ -10,7 +10,7 @@ import typing
 from functools import reduce
 from typing import *
 
-if sys.version_info <= (3, 8):
+if sys.version_info < (3, 8):
     # python 3.7 doesn't have Protocol in typing
     from typing_extensions import Protocol
 
