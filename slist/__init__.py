@@ -20,19 +20,19 @@ CanHash = TypeVar("CanHash", bound=Hashable)
 
 identity = lambda x: x
 
+if typing.TYPE_CHECKING: # for compat with python 3.7
+    class Comparable(Protocol):
+        def __lt__(self: CanCompare, other: CanCompare) -> bool:
+            pass
 
-class Comparable(Protocol):
-    def __lt__(self: CanCompare, other: CanCompare) -> bool:
-        pass
+        def __gt__(self: CanCompare, other: CanCompare) -> bool:
+            pass
 
-    def __gt__(self: CanCompare, other: CanCompare) -> bool:
-        pass
+        def __le__(self: CanCompare, other: CanCompare) -> bool:
+            pass
 
-    def __le__(self: CanCompare, other: CanCompare) -> bool:
-        pass
-
-    def __ge__(self: CanCompare, other: CanCompare) -> bool:
-        pass
+        def __ge__(self: CanCompare, other: CanCompare) -> bool:
+            pass
 
 
 class Slist(List[A]):
