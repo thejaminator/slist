@@ -101,9 +101,11 @@ def test_window_too_small_list():
     test_list = Slist([1])
     assert test_list.window(size=2) == Slist()
 
+
 def test_median():
     numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
     assert numbers.median_by(identity) == 5
+
 
 def test_percentile():
     numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
@@ -118,8 +120,16 @@ def test_max_by():
     empty = Slist([])
     assert empty.max_by(identity) is None
 
+
 def test_min_by():
     numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
     assert numbers.min_by(identity) == 1
     empty = Slist([])
     assert empty.min_by(identity) is None
+
+
+def test_mode_option():
+    numbers = Slist([1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1])
+    assert numbers.mode_option == 1
+    empty = Slist([])
+    assert empty.mode_option is None

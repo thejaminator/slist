@@ -215,6 +215,19 @@ class Slist(List[A]):
         except IndexError:
             return None
 
+    @property
+    def mode_option(self) -> Optional[A]:
+        try:
+            return statistics.mode(self)
+        except statistics.StatisticsError:
+            return None
+
+    def mode_or_raise(self, exception: Exception = RuntimeError("List is empty")) -> A:
+        try:
+            return statistics.mode(self)
+        except statistics.StatisticsError:
+            raise exception
+
     def first_or_raise(self, exception: Exception = RuntimeError("List is empty")) -> A:
         try:
             return self.__getitem__(0)
