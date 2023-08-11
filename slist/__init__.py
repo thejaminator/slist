@@ -7,12 +7,10 @@ import re
 import statistics
 import sys
 import typing
-from functools import reduce
-from typing import *
+from collections import OrderedDict
 
-if sys.version_info < (3, 8):
-    # python 3.7 doesn't have Protocol in typing
-    from typing_extensions import Protocol
+from functools import reduce
+from typing import TypeVar, Hashable, Protocol, Callable, Optional, List, Union, Sequence, overload, Any, Tuple
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -26,18 +24,26 @@ CanHash = TypeVar("CanHash", bound=Hashable)
 identity = lambda x: x
 
 
+class Addable(Protocol):
+    def __add__(self: A, other: A, /) -> A:
+        ...
+
+
+CanAdd = TypeVar("CanAdd", bound=Addable)
+
+
 class Comparable(Protocol):
-    def __lt__(self: CanCompare, other: CanCompare) -> bool:
-        pass
+    def __lt__(self: CanCompare, other: CanCompare, /) -> bool:
+        ...
 
-    def __gt__(self: CanCompare, other: CanCompare) -> bool:
-        pass
+    def __gt__(self: CanCompare, other: CanCompare, /) -> bool:
+        ...
 
-    def __le__(self: CanCompare, other: CanCompare) -> bool:
-        pass
+    def __le__(self: CanCompare, other: CanCompare, /) -> bool:
+        ...
 
-    def __ge__(self: CanCompare, other: CanCompare) -> bool:
-        pass
+    def __ge__(self: CanCompare, other: CanCompare, /) -> bool:
+        ...
 
 
 class Slist(List[A]):
@@ -75,7 +81,7 @@ class Slist(List[A]):
     def map_enumerate(self, func: Callable[[int, A], B]) -> Slist[B]:
         return Slist(func(idx, item) for idx, item in enumerate(self))
 
-    def flatten_option(self: Slist[Optional[B]]) -> Slist[B]:
+    def flatten_option(self: Sequence[Optional[B]]) -> Slist[B]:
         return Slist([item for item in self if item is not None])
 
     def flat_map_option(self, func: Callable[[A], Optional[B]]) -> Slist[B]:
@@ -142,7 +148,7 @@ class Slist(List[A]):
                 d[k] = Slist([elem])
         return Slist(d.items())
 
-    def to_dict(self: Slist[Tuple[CanHash, B]]) -> Dict[CanHash, B]:
+    def to_dict(self: Slist[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
         """
         Transforms a Slist of key value pairs to a dictionary
         >>> Slist([(1, Slist([1, 1])), (2, Slist([2, 2])])).to_dict()
@@ -152,11 +158,11 @@ class Slist(List[A]):
         """
         return dict(self)
 
-    def to_set(self) -> Set[A]:
+    def to_set(self) -> typing.Set[A]:
         return set(self)
 
     @staticmethod
-    def from_dict(a_dict: Dict[CanHash, A]) -> Slist[Tuple[CanHash, A]]:
+    def from_dict(a_dict: typing.Dict[CanHash, A]) -> Slist[Tuple[CanHash, A]]:
         return Slist(tup for tup in a_dict.items())
 
     def for_each_enumerate(self, func: Callable[[int, A], None]) -> Slist[A]:
@@ -277,7 +283,7 @@ class Slist(List[A]):
                 raise TypeError(f"Zipping with two different length sequences. {len(self)} != {len(arg)}")
         return Slist(zip(self, *all_args))
 
-    def slice_with_bool(self, bools: Sequence[B]) -> Slist[A]:
+    def slice_with_bool(self, bools: Sequence[bool]) -> Slist[A]:
         """Gets elements of the list with a sequence of booleans that are of the same length"""
         return self.zip(bools).flat_map_option(lambda tup: tup[0] if tup[1] is True else None)
 
@@ -524,7 +530,7 @@ class Slist(List[A]):
         return Slist(results)
 
     async def par_map_async(
-        self, func: Callable[[A], Awaitable[B]], loop: Optional[asyncio.AbstractEventLoop] = None
+        self, func: Callable[[A], typing.Awaitable[B]], loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
         return Slist(await asyncio.gather(*[func(item) for item in self], loop=loop))  # type: ignore
@@ -545,40 +551,41 @@ class Slist(List[A]):
         return sep.join(self)
 
     @overload
-    def sum(self: Slist[int]) -> int:
+    def sum(self: Sequence[int]) -> int:
         ...
 
     @overload
-    def sum(self: Slist[float]) -> float:
+    def sum(self: Sequence[float]) -> float:
         ...
 
     @overload
-    def sum(self: Slist[bool]) -> int:
+    def sum(self: Sequence[bool]) -> int:
         ...
 
     def sum(
-        self: Slist[Union[int, float, bool]],
+        self: Sequence[Union[int, float, bool]],
     ) -> Union[int, float]:
         """Returns 0 when the list is empty"""
         return sum(self)
 
     @overload
-    def average(self: Slist[int]) -> Optional[float]:
+    def average(self: Sequence[int]) -> Optional[float]:
         ...
 
     @overload
-    def average(self: Slist[float]) -> Optional[float]:
+    def average(self: Sequence[float]) -> Optional[float]:
         ...
 
     @overload
-    def average(self: Slist[bool]) -> Optional[float]:
+    def average(self: Sequence[bool]) -> Optional[float]:
         ...
 
     def average(
-        self: Slist[Union[int, float, bool]],
+        self: Sequence[Union[int, float, bool]],
     ) -> Optional[float]:
         """Returns None when the list is empty"""
-        return self.sum() / self.length if self.length > 0 else None
+        this = typing.cast(Slist[Union[int, float, bool]], self)
+        return this.sum() / this.length if this.length > 0 else None
 
     def standard_deviation(self: Slist[Union[int, float]]) -> Optional[float]:
         """Returns None when the list is empty"""
@@ -593,6 +600,18 @@ class Slist(List[A]):
 
     def fold_left(self, acc: B, func: Callable[[B, A], B]) -> B:
         return reduce(func, self, acc)
+
+    def fold_right(self, acc: B, func: Callable[[A, B], B]) -> B:
+        return reduce(lambda a, b: func(b, a), reversed(self), acc)
+
+    def sum_option(self: Sequence[CanAdd]) -> Optional[CanAdd]:
+        """Folds left with addition. Returns None if the list is empty"""
+        return reduce(lambda a, b: a + b, self) if len(self) > 0 else None
+
+    def sum_or_raise(self: Sequence[CanAdd]) -> CanAdd:
+        """Folds left with addition. Raises if the list is empty"""
+        assert len(self) > 0, "Cannot fold empty list"
+        return reduce(lambda a, b: a + b, self)
 
     def split_by(self, predicate: Callable[[A], bool]) -> Tuple[Slist[A], Slist[A]]:
         """Splits the list into two lists based on the predicate"""

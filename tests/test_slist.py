@@ -133,3 +133,10 @@ def test_mode_option():
     assert numbers.mode_option == 1
     empty = Slist([])
     assert empty.mode_option is None
+
+
+def test_fold_left_add():
+    numbers = Slist([1, 2, 3, 4, 5])
+    assert numbers.sum_option() == 15
+    empty = Slist([])
+    assert empty.sum_option() is None
