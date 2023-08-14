@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "slist"
-version = "0.1.9"
+version = "0.2.0"
 homepage = "https://github.com/thejaminator/slist"
 description = "A typesafe list with more method chaining!"
 authors = ["James Chua <chuajamessh@gmail.com>"]

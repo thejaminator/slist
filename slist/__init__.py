@@ -536,10 +536,10 @@ class Slist(List[A]):
         return Slist(results)
 
     async def par_map_async(
-        self, func: Callable[[A], typing.Awaitable[B]], loop: Optional[asyncio.AbstractEventLoop] = None
+        self, func: Callable[[A], typing.Awaitable[B]]
     ) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
-        return Slist(await asyncio.gather(*[func(item) for item in self], loop=loop))  # type: ignore
+        return Slist(await asyncio.gather(*[func(item) for item in self]))
 
     def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> Slist[A]:
         """Filters a list of text with text terms"""
