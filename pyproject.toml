@@ -78,3 +78,27 @@ exclude = '''
 [build-system]
 requires = ["poetry-core>=1.0.0", "twine"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.pyright]
+exclude = ["venv"]
+
+strictListInference = true
+strictDictionaryInference = true
+strictSetInference = true
+reportFunctionMemberAccess = true
+reportUnknownParameterType = true
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+reportInconsistentConstructorType = true
+reportOverlappingOverload = true
+reportConstantRedefinition = true
+reportImportCycles = true
+reportPropertyTypeMismatch = true
+reportMissingTypeArgument = true
+reportUnnecessaryCast = true
+reportUnnecessaryComparison = true
+reportUnnecessaryContains = true
+reportUnusedExpression = true
+reportMatchNotExhaustive = true
+reportShadowedImports = true

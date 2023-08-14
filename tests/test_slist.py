@@ -71,7 +71,7 @@ def test_take_until_inclusive():
 
 @pytest.mark.asyncio
 async def test_par_map_async():
-    async def func(x):
+    async def func(x: int) -> int:
         return x * 2
 
     result = await Slist([1, 2, 3]).par_map_async(func)
@@ -119,6 +119,12 @@ def test_max_by():
     assert numbers.max_by(identity) == 9
     empty = Slist([])
     assert empty.max_by(identity) is None
+
+def test_max_option():
+    numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
+    assert numbers.max_option() == 9
+    empty = Slist([])
+    assert empty.max_option() is None
 
 
 def test_min_by():

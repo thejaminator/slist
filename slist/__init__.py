@@ -172,6 +172,9 @@ class Slist(List[A]):
             func(idx, item)
         return self
 
+    def max_option(self: Sequence[CanCompare]) -> Optional[CanCompare]:
+        return max(self) if self else None
+
     def max_by(self, key: Callable[[A], CanCompare]) -> Optional[A]:
         return max(self, key=key) if self.length > 0 else None
 
@@ -182,6 +185,9 @@ class Slist(List[A]):
                 if ordering(theMax, currentItem):
                     theMax = currentItem
         return theMax
+
+    def min_option(self: Sequence[CanCompare]) -> Optional[CanCompare]:
+        return min(self) if self else None
 
     def min_by(self, key: Callable[[A], CanCompare]) -> Optional[A]:
         return min(self, key=key) if self.length > 0 else None
@@ -453,7 +459,7 @@ class Slist(List[A]):
     def __getitem__(self, i: slice) -> Slist[A]:
         pass
 
-    def __getitem__(self, i: Union[int, slice]) -> Union[A, Slist[A]]:
+    def __getitem__(self, i: Union[int, slice]) -> Union[A, Slist[A]]: # type: ignore
         if isinstance(i, int):
             return super().__getitem__(i)
         else:
@@ -558,10 +564,6 @@ class Slist(List[A]):
     def sum(self: Sequence[float]) -> float:
         ...
 
-    @overload
-    def sum(self: Sequence[bool]) -> int:
-        ...
-
     def sum(
         self: Sequence[Union[int, float, bool]],
     ) -> Union[int, float]:
@@ -576,9 +578,6 @@ class Slist(List[A]):
     def average(self: Sequence[float]) -> Optional[float]:
         ...
 
-    @overload
-    def average(self: Sequence[bool]) -> Optional[float]:
-        ...
 
     def average(
         self: Sequence[Union[int, float, bool]],
@@ -697,5 +696,5 @@ class Slist(List[A]):
                 else:
                     new.append(item)
 
-    def __mul__(self, other) -> Slist[A]:
+    def __mul__(self, other: typing.SupportsIndex) -> Slist[A]:
         return Slist(super().__mul__(other))
