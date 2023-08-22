@@ -3,7 +3,7 @@ This is a drop in replacement for the built-in mutable python list
 
 But with more post-fixed methods for chaining in a typesafe manner!!
 
-Leverage the latest mypy features to spot errors during coding.
+Leverage the latest pyright features to spot errors during coding.
 
 All these methods return a new list. They do not mutate the original list.
 
