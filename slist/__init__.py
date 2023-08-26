@@ -697,3 +697,10 @@ class Slist(List[A]):
 
     def __mul__(self, other: typing.SupportsIndex) -> Slist[A]:
         return Slist(super().__mul__(other))
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler):
+        # only called by pydantic v2
+        from pydantic_core import core_schema  # type: ignore
+
+        return core_schema.no_info_after_validator_function(cls, handler(list))
