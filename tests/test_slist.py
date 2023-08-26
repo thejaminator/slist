@@ -120,6 +120,7 @@ def test_max_by():
     empty = Slist([])
     assert empty.max_by(identity) is None
 
+
 def test_max_option():
     numbers = Slist([2, 3, 4, 5, 6, 7, 8, 9, 1])
     assert numbers.max_option() == 9

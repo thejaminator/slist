@@ -126,10 +126,7 @@ class Slist(List[A]):
             return random.Random(seed).choice(self)
 
     def sample(self, n: int, seed: Optional[str] = None) -> Slist[A]:
-        if n < self.length:
-            return Slist(random.Random(seed).sample(self, n))
-        else:
-            return self.copy()
+        return Slist(random.Random(seed).sample(self, n))
 
     def for_each(self, func: Callable[[A], None]) -> Slist[A]:
         """Runs an effect on each element, and returns the original list
@@ -459,7 +456,7 @@ class Slist(List[A]):
     def __getitem__(self, i: slice) -> Slist[A]:
         pass
 
-    def __getitem__(self, i: Union[int, slice]) -> Union[A, Slist[A]]: # type: ignore
+    def __getitem__(self, i: Union[int, slice]) -> Union[A, Slist[A]]:  # type: ignore
         if isinstance(i, int):
             return super().__getitem__(i)
         else:
@@ -487,10 +484,15 @@ class Slist(List[A]):
             output.append(self[i : i + size])
         return output
 
-    def distinct_unsafe(self: Slist[CanHash]) -> Slist[CanHash]:
+    def distinct(self: Sequence[CanHash]) -> Slist[CanHash]:
+        """Deduplicates items. Preserves order."""
+        return self.distinct_unsafe()  # type: ignore
+
+    def distinct_unsafe(self: Sequence[CanHash]) -> Slist[CanHash]:
         """Deduplicates items. Preserves order.
-        Mypy does not typecheck properly until https://github.com/python/mypy/issues/11167 is resolved
-        use distinct_by(lambda x: x) for a safe version that properly typechecks"""
+        To be deprecated in favour of distinct
+        Previously was type-unsafe due to mypy bug
+        """
         seen = set()
         output = Slist[CanHash]()
         for item in self:
@@ -535,9 +537,7 @@ class Slist(List[A]):
             results.append(fut.result())
         return Slist(results)
 
-    async def par_map_async(
-        self, func: Callable[[A], typing.Awaitable[B]]
-    ) -> Slist[B]:
+    async def par_map_async(self, func: Callable[[A], typing.Awaitable[B]]) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
         return Slist(await asyncio.gather(*[func(item) for item in self]))
 
@@ -577,7 +577,6 @@ class Slist(List[A]):
     @overload
     def average(self: Sequence[float]) -> Optional[float]:
         ...
-
 
     def average(
         self: Sequence[Union[int, float, bool]],
