@@ -10,6 +10,7 @@ import typing
 from collections import OrderedDict
 
 from functools import reduce
+from itertools import tee
 from typing import TypeVar, Hashable, Protocol, Callable, Optional, List, Union, Sequence, overload, Any, Tuple
 
 A = TypeVar("A")
@@ -197,6 +198,28 @@ class Slist(List[A]):
             return self.__getitem__(index)
         except IndexError:
             return or_else
+
+    def get_option(self, index: int) -> Optional[A]:
+        try:
+            return self.__getitem__(index)
+        except IndexError:
+            return None
+
+    def pairwise(self) -> Slist[Tuple[A, A]]:
+        """From more-itertools
+        Returns an iterator of paired items, overlapping, from the original"""
+        a, b = tee(self)
+        next(b, None)
+        return Slist(zip(a, b))
+
+    def print_length(self, printer: Callable[[str], None] = print, prefix: str = "Slist Length: ") -> Slist[A]:
+        """Prints the length of the list, and returns the original list
+        e.g. Slist([1,2,3]).print_length()
+        >>> Slist Length: 3
+        """
+        string = f"{prefix}{len(self)}"
+        printer(string)
+        return self
 
     @property
     def is_empty(self) -> bool:
