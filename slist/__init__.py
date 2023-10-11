@@ -722,7 +722,7 @@ class Slist(List[A]):
         return Slist(super().__mul__(other))
 
     @classmethod
-    def __get_pydantic_core_schema__(cls, source_type: Any, handler):
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler):  # type: ignore
         # only called by pydantic v2
         from pydantic_core import core_schema  # type: ignore
 
