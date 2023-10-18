@@ -576,7 +576,7 @@ class Slist(List[A]):
 
         return self.filter(predicate=lambda item: matches_search(key(item)))
 
-    def mk_string(self: Slist[str], sep: str) -> str:
+    def mk_string(self: Sequence[str], sep: str) -> str:
         return sep.join(self)
 
     @overload
