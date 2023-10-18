@@ -593,20 +593,21 @@ class Slist(List[A]):
         """Returns 0 when the list is empty"""
         return sum(self)
 
-    @overload
-    def average(self: Sequence[int]) -> Optional[float]:
-        ...
-
-    @overload
-    def average(self: Sequence[float]) -> Optional[float]:
-        ...
-
     def average(
         self: Sequence[Union[int, float, bool]],
     ) -> Optional[float]:
         """Returns None when the list is empty"""
         this = typing.cast(Slist[Union[int, float, bool]], self)
         return this.sum() / this.length if this.length > 0 else None
+
+    def average_or_raise(
+        self: Sequence[Union[int, float, bool]],
+    ) -> float:
+        """Returns None when the list is empty"""
+        this = typing.cast(Slist[Union[int, float, bool]], self)
+        if this.length == 0:
+            raise ValueError("Cannot get average of empty list")
+        return this.sum() / this.length
 
     def standard_deviation(self: Slist[Union[int, float]]) -> Optional[float]:
         """Returns None when the list is empty"""
