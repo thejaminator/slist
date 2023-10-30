@@ -147,3 +147,77 @@ def test_fold_left_add():
     assert numbers.sum_option() == 15
     empty = Slist([])
     assert empty.sum_option() is None
+
+
+def test_group_by():
+    class Animal:
+        def __init__(self, name: str, age: int):
+            self.name = name
+            self.age = age
+
+    animals = Slist(
+        [
+            Animal("cat", 1),
+            Animal("cat", 2),
+            Animal("dog", 1),
+        ]
+    )
+    # group_by name, then average out the age
+    result = animals.group_by(lambda animal: animal.name).map(
+        lambda group: group.map_values(lambda animal: animal.map(lambda x: x.age).average_or_raise())
+    )
+    assert result == Slist(
+        [
+            ("cat", 1.5),
+            ("dog", 1),
+        ]
+    )
+
+
+def test_group_by_len():
+    class Animal:
+        def __init__(self, name: str, age: int):
+            self.name = name
+            self.age = age
+
+    animals = Slist(
+        [
+            Animal("cat", 1),
+            Animal("cat", 2),
+            Animal("dog", 1),
+        ]
+    )
+    # group_by name, then average out the age
+    result = animals.group_by(lambda animal: animal.name).map(lambda group: group.map_values(len))
+    assert result == Slist(
+        [
+            ("cat", 2),
+            ("dog", 1),
+        ]
+    )
+
+
+def test_group_by_map_2():
+    class Animal:
+        def __init__(self, name: str, age: int):
+            self.name = name
+            self.age = age
+
+    animals = Slist(
+        [
+            Animal("cat", 1),
+            Animal("cat", 2),
+            Animal("dog", 1),
+        ]
+    )
+    # group_by name, then average out the age
+    group = animals.group_by(lambda animal: animal.name)
+    result = group.map_2(
+        lambda group_name, group_values: (group_name, group_values.map(lambda animal: animal.age).average_or_raise())
+    )
+    assert result == Slist(
+        [
+            ("cat", 1.5),
+            ("dog", 1),
+        ]
+    )
