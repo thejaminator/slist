@@ -13,7 +13,6 @@ from functools import reduce
 from itertools import tee
 from typing import (
     Generic,
-    NamedTuple,
     TypeVar,
     Hashable,
     Protocol,
@@ -26,6 +25,9 @@ from typing import (
     Any,
     Tuple,
 )
+
+# Needed for https://github.com/python/typing_extensions/issues/7
+from typing_extensions import NamedTuple
 
 A = TypeVar("A")
 B = TypeVar("B")
