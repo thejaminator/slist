@@ -207,7 +207,7 @@ class Slist(List[A]):
                 d[k] = Slist([elem])
         return Slist(Group(key=key, values=value) for key, value in d.items())
 
-    def to_dict(self: Slist[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
+    def to_dict(self: Sequence[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
         """
         Transforms a Slist of key value pairs to a dictionary
         >>> Slist([(1, Slist([1, 1])), (2, Slist([2, 2])])).to_dict()
