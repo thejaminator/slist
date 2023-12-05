@@ -708,7 +708,8 @@ class Slist(List[A]):
         return left, right
 
     def split_on(self, predicate: Callable[[A], bool]) -> Slist[Slist[A]]:
-        """Splits the list into lists of non empty lists"""
+        """Splits the list into sections based on the predicate,
+        items matching the predicate are not included in the output"""
         output = Slist[Slist[A]]()
         current = Slist[A]()
         for item in self:
