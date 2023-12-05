@@ -11,7 +11,23 @@ from collections import OrderedDict
 
 from functools import reduce
 from itertools import tee
-from typing import TypeVar, Hashable, Protocol, Callable, Optional, List, Union, Sequence, overload, Any, Tuple
+from typing import (
+    Generic,
+    TypeVar,
+    Hashable,
+    Protocol,
+    Callable,
+    Optional,
+    List,
+    Union,
+    Sequence,
+    overload,
+    Any,
+    Tuple,
+)
+
+# Needed for https://github.com/python/typing_extensions/issues/7
+from typing_extensions import NamedTuple
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -23,6 +39,19 @@ CanCompare = TypeVar("CanCompare", bound="Comparable")
 CanHash = TypeVar("CanHash", bound=Hashable)
 
 identity = lambda x: x
+
+
+class Group(NamedTuple, Generic[A, B]):
+    """This is a NamedTuple so that you can easily access the key and values"""
+
+    key: A
+    values: B
+
+    def map_key(self, func: Callable[[A], C]) -> Group[C, B]:
+        return Group(func(self.key), self.values)
+
+    def map_values(self, func: Callable[[B], C]) -> Group[A, C]:
+        return Group(self.key, func(self.values))
 
 
 class Addable(Protocol):
@@ -76,7 +105,7 @@ class Slist(List[A]):
     def map(self, func: Callable[[A], B]) -> Slist[B]:
         return Slist(func(item) for item in self)
 
-    def map_2(self: Slist[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
+    def map_2(self: Sequence[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
         return Slist(func(b, c) for b, c in self)
 
     def map_enumerate(self, func: Callable[[int, A], B]) -> Slist[B]:
@@ -136,7 +165,39 @@ class Slist(List[A]):
             func(item)
         return self
 
-    def group_by(self, key: Callable[[A], CanHash]) -> Slist[Tuple[CanHash, Slist[A]]]:
+    def group_by(self, key: Callable[[A], CanHash]) -> Slist[Group[CanHash, Slist[A]]]:
+        """
+        Groups the list by the given key
+        Returns a NamedTuple with attributes
+            key: The key that was used to group
+            values: The values that were grouped
+
+
+        Examples
+        ----
+            class Animal:
+                def __init__(self, name: str, age: int):
+                    self.name = name
+                    self.age = age
+
+            animals = Slist(
+                [
+                    Animal("cat", 1),
+                    Animal("cat", 2),
+                    Animal("dog", 1),
+                ]
+            )
+            # group_by name, then average out the age
+            result = animals.group_by(lambda animal: animal.name).map(
+                lambda group: group.map_values(len)
+            )
+            assert result == Slist(
+                [
+                    ("cat", 2),
+                    ("dog", 1),
+                ]
+            )
+        """
         d: typing.OrderedDict[CanHash, Slist[A]] = OrderedDict()
         for elem in self:
             k = key(elem)
@@ -144,9 +205,9 @@ class Slist(List[A]):
                 d[k].append(elem)
             else:
                 d[k] = Slist([elem])
-        return Slist(d.items())
+        return Slist(Group(key=key, values=value) for key, value in d.items())
 
-    def to_dict(self: Slist[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
+    def to_dict(self: Sequence[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
         """
         Transforms a Slist of key value pairs to a dictionary
         >>> Slist([(1, Slist([1, 1])), (2, Slist([2, 2])])).to_dict()
@@ -576,7 +637,7 @@ class Slist(List[A]):
 
         return self.filter(predicate=lambda item: matches_search(key(item)))
 
-    def mk_string(self: Slist[str], sep: str) -> str:
+    def mk_string(self: Sequence[str], sep: str) -> str:
         return sep.join(self)
 
     @overload
