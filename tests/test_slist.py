@@ -43,6 +43,26 @@ def test_split_by():
     ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
 
 
+def test_split_on():
+    assert Slist([1, 2, 3, 4, 5]).split_on(lambda x: x == 3) == Slist(
+        [
+            Slist([1, 2]),
+            Slist([4, 5]),
+        ]
+    )
+    assert Slist(["hello", "", "world"]).split_on(lambda x: x == "") == Slist(
+        [
+            Slist(["hello"]),
+            Slist(["world"]),
+        ]
+    )
+    assert Slist(["hello", "world"]).split_on(lambda x: x == "") == Slist(
+        [
+            Slist(["hello", "world"]),
+        ]
+    )
+
+
 def test_find_last_idx_or_raise():
     assert Slist([1, 1, 1, 1]).find_last_idx_or_raise(lambda x: x == 1) == 3
 

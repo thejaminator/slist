@@ -707,6 +707,20 @@ class Slist(List[A]):
                 right.append(item)
         return left, right
 
+    def split_on(self, predicate: Callable[[A], bool]) -> Slist[Slist[A]]:
+        """Splits the list into sections based on the predicate,
+        items matching the predicate are not included in the output"""
+        output = Slist[Slist[A]]()
+        current = Slist[A]()
+        for item in self:
+            if predicate(item):
+                output.append(current)
+                current = Slist[A]()
+            else:
+                current.append(item)
+        output.append(current)
+        return output
+
     def split_proportion(self, left_proportion: float) -> Tuple[Slist[A], Slist[A]]:
         """Splits the list into two lists based on the left_proportion. 0 < left_proportion < 1"""
         assert 0 < left_proportion < 1, "left_proportion needs to be between 0 and 1"

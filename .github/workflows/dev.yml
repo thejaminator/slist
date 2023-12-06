@@ -39,6 +39,9 @@ jobs:
           pip install pytest
 
       - uses: jakebailey/pyright-action@v1
+        with:
+          # 1.1.337 triggers a bunch of possibly spurious errors but eric probably knows better
+          version: 1.1.336 
 
       - name: list files
         run: ls -l .
