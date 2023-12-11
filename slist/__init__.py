@@ -207,6 +207,19 @@ class Slist(List[A]):
                 d[k] = Slist([elem])
         return Slist(Group(key=key, values=value) for key, value in d.items())
 
+    def map_on_group_values(self: Slist[Group[A, Sequence[B]]], func: Callable[[Sequence[B]], C]) -> Slist[Group[A, C]]:
+        # Apply a function on the group's vsalues
+        return self.map(lambda group: group.map_values(func))
+
+
+    def map_on_group_values_list(
+        self: Slist[Group[A, Sequence[B]]], func: Callable[[B], C]
+    ) -> Slist[Group[A, Sequence[C]]]:
+        # If your group's values are a list, and you want to apply a function on each element of the list
+        # e.g. Slist([Group(1, [1, 2, 3]), Group(2, [4, 5, 6])]).map_on_group_values_list(lambda x: x + 1)
+        # Slist([Group(1, [2, 3, 4]), Group(2, [5, 6, 7])]) 
+        return self.map(lambda group: group.map_values(lambda values: Slist(values).map(func)))
+
     def to_dict(self: Sequence[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
         """
         Transforms a Slist of key value pairs to a dictionary
