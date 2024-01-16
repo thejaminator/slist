@@ -206,6 +206,11 @@ class Slist(List[A]):
             else:
                 d[k] = Slist([elem])
         return Slist(Group(key=key, values=value) for key, value in d.items())
+    
+
+    def ungroup(self: Slist[Group[A, B]]) -> Slist[B]:
+        """Ungroups the list of groups"""
+        return self.map_2(lambda _, values: values)
 
     def map_on_group_values(self: Slist[Group[B, Slist[C]]], func: Callable[[Slist[C]], D]) -> Slist[Group[B, D]]:
         # Apply a function on the group's vsalues
