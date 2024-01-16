@@ -207,7 +207,7 @@ class Slist(List[A]):
                 d[k] = Slist([elem])
         return Slist(Group(key=key, values=value) for key, value in d.items())
 
-    def ungroup(self: Slist[Group[A, Sequence[B]]]) -> Slist[B]:
+    def ungroup(self: Slist[Group[Any, Sequence[C]]]) -> Slist[C]:
         """Ungroups the list of groups"""
         return self.map_2(lambda _, values: values).flatten_list()
 
