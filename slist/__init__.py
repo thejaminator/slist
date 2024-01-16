@@ -207,17 +207,16 @@ class Slist(List[A]):
                 d[k] = Slist([elem])
         return Slist(Group(key=key, values=value) for key, value in d.items())
 
-    def map_on_group_values(self: Slist[Group[A, Sequence[B]]], func: Callable[[Sequence[B]], C]) -> Slist[Group[A, C]]:
+    def map_on_group_values(self: Slist[Group[B, Slist[C]]], func: Callable[[Slist[C]], D]) -> Slist[Group[B, D]]:
         # Apply a function on the group's vsalues
         return self.map(lambda group: group.map_values(func))
-
 
     def map_on_group_values_list(
         self: Slist[Group[A, Sequence[B]]], func: Callable[[B], C]
     ) -> Slist[Group[A, Sequence[C]]]:
         # If your group's values are a list, and you want to apply a function on each element of the list
         # e.g. Slist([Group(1, [1, 2, 3]), Group(2, [4, 5, 6])]).map_on_group_values_list(lambda x: x + 1)
-        # Slist([Group(1, [2, 3, 4]), Group(2, [5, 6, 7])]) 
+        # Slist([Group(1, [2, 3, 4]), Group(2, [5, 6, 7])])
         return self.map(lambda group: group.map_values(lambda values: Slist(values).map(func)))
 
     def to_dict(self: Sequence[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
@@ -561,7 +560,7 @@ class Slist(List[A]):
 
     def grouped(self, size: int) -> Slist[Slist[A]]:
         """Groups the list into chunks of size `size`"""
-        output = Slist[Slist[A]]()
+        output: Slist[Slist[A]] = Slist()
         for i in range(0, self.length, size):
             output.append(self[i : i + size])
         return output
@@ -576,7 +575,7 @@ class Slist(List[A]):
         >>> Slist([1]).window(2)
         []
         """
-        output = Slist[Slist[A]]()
+        output: Slist[Slist[A]] = Slist()
         for i in range(0, self.length - size + 1):
             output.append(self[i : i + size])
         return output
@@ -723,7 +722,7 @@ class Slist(List[A]):
     def split_on(self, predicate: Callable[[A], bool]) -> Slist[Slist[A]]:
         """Splits the list into sections based on the predicate,
         items matching the predicate are not included in the output"""
-        output = Slist[Slist[A]]()
+        output: Slist[Slist[A]] = Slist()
         current = Slist[A]()
         for item in self:
             if predicate(item):
@@ -749,8 +748,8 @@ class Slist(List[A]):
     def split_into_n(self, n: int) -> Slist[Slist[A]]:
         """Splits the list into n lists of roughly equal size"""
         assert n > 0, "n needs to be greater than 0"
-        output = Slist[Slist[A]]()
-        for i in range(n):
+        output: Slist[Slist[A]] = Slist()
+        for _ in range(n):
             output.append(Slist[A]())
         for idx, item in enumerate(self):
             output[idx % n].append(item)
