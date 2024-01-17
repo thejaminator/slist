@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
+from ctypes import cast
 import random
 import re
 import statistics
@@ -40,17 +41,20 @@ CanHash = TypeVar("CanHash", bound=Hashable)
 
 identity = lambda x: x
 
+A_co = TypeVar("A_co", covariant=True)
+B_co = TypeVar("B_co", covariant=True)
 
-class Group(NamedTuple, Generic[A, B]):
+
+class Group(NamedTuple, Generic[A_co, B_co]):
     """This is a NamedTuple so that you can easily access the key and values"""
 
-    key: A
-    values: B
+    key: A_co
+    values: B_co
 
-    def map_key(self, func: Callable[[A], C]) -> Group[C, B]:
+    def map_key(self, func: Callable[[A_co], C]) -> Group[C, B_co]:
         return Group(func(self.key), self.values)
 
-    def map_values(self, func: Callable[[B], C]) -> Group[A, C]:
+    def map_values(self, func: Callable[[B_co], C]) -> Group[A_co, C]:
         return Group(self.key, func(self.values))
 
 
@@ -207,9 +211,18 @@ class Slist(List[A]):
                 d[k] = Slist([elem])
         return Slist(Group(key=key, values=value) for key, value in d.items())
 
+    @overload
+    def ungroup(self: Slist[Group[Any, Slist[C]]]) -> Slist[C]:
+        ...
+
+    @overload
     def ungroup(self: Slist[Group[Any, Sequence[C]]]) -> Slist[C]:
+        ...
+
+    def ungroup(self: Slist[Group[Any, Slist[C]]] | Slist[Group[Any, Sequence[C]]]) -> Slist[C]:
         """Ungroups the list of groups"""
-        return self.map_2(lambda _, values: values).flatten_list()
+        casted: Slist[Group[Any, Slist[C]]] = self  # type: ignore
+        return casted.map_2(lambda _, values: values).flatten_list()
 
     def map_on_group_values(self: Slist[Group[B, Slist[C]]], func: Callable[[Slist[C]], D]) -> Slist[Group[B, D]]:
         # Apply a function on the group's vsalues
