@@ -241,3 +241,12 @@ def test_group_by_map_2():
             ("dog", 1),
         ]
     )
+
+def test_take_or_raise():
+    numbers = Slist([1, 2, 3, 4, 5])
+    assert numbers.take_or_raise(0) == Slist([])
+    assert numbers.take_or_raise(1) == Slist([1])
+    assert numbers.take_or_raise(2) == Slist([1, 2])
+    assert numbers.take_or_raise(5) == Slist([1, 2, 3, 4, 5])
+    with pytest.raises(ValueError):
+        numbers.take_or_raise(6)

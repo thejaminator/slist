@@ -90,7 +90,7 @@ class Slist(List[A]):
         """Returns a list with one element, or an empty slist if the element is None
         Equal to Slist.one(element).flatten_option()"""
         return Slist([element]) if element is not None else Slist()
-
+    
     def any(self, predicate: Callable[[A], bool]) -> bool:
         for x in self:
             if predicate(x):
@@ -450,6 +450,12 @@ class Slist(List[A]):
             raise exception
 
     def take(self, n: int) -> Slist[A]:
+        return Slist(self[:n])
+    
+    def take_or_raise(self, n: int) -> Slist[A]:
+        # raises if we end up having less elements than n
+        if len(self) < n:
+            raise ValueError(f"Cannot take {n} elements from a list of length {len(self)}")
         return Slist(self[:n])
 
     def take_until_exclusive(self, predicate: Callable[[A], bool]) -> Slist[A]:
