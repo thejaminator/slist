@@ -663,7 +663,7 @@ class Slist(List[A]):
         """Applies the async function to each element. Awaits for all results."""
         return Slist(await asyncio.gather(*[func(item) for item in self]))
     
-    async def gather(self: Sequence[typing.Awaitable[A]]) -> Slist[A]:
+    async def gather(self: Sequence[typing.Awaitable[B]]) -> Slist[B]:
         """Awaits for all results"""
         return Slist(await asyncio.gather(*self))
 
