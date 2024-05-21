@@ -90,7 +90,7 @@ class Slist(List[A]):
         """Returns a list with one element, or an empty slist if the element is None
         Equal to Slist.one(element).flatten_option()"""
         return Slist([element]) if element is not None else Slist()
-    
+
     def any(self, predicate: Callable[[A], bool]) -> bool:
         for x in self:
             if predicate(x):
@@ -108,6 +108,9 @@ class Slist(List[A]):
 
     def map(self, func: Callable[[A], B]) -> Slist[B]:
         return Slist(func(item) for item in self)
+
+    def product(self: Sequence[A], other: Sequence[B]) -> Slist[Tuple[A, B]]:
+        return Slist((a, b) for a in self for b in other)
 
     def map_2(self: Sequence[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
         return Slist(func(b, c) for b, c in self)
@@ -451,7 +454,7 @@ class Slist(List[A]):
 
     def take(self, n: int) -> Slist[A]:
         return Slist(self[:n])
-    
+
     def take_or_raise(self, n: int) -> Slist[A]:
         # raises if we end up having less elements than n
         if len(self) < n:

@@ -242,6 +242,7 @@ def test_group_by_map_2():
         ]
     )
 
+
 def test_take_or_raise():
     numbers = Slist([1, 2, 3, 4, 5])
     assert numbers.take_or_raise(0) == Slist([])
@@ -250,3 +251,37 @@ def test_take_or_raise():
     assert numbers.take_or_raise(5) == Slist([1, 2, 3, 4, 5])
     with pytest.raises(ValueError):
         numbers.take_or_raise(6)
+
+
+def test_product():
+    numbers = Slist([1, 2, 3, 4, 5])
+    # cartesian product
+    assert numbers.product(numbers) == Slist(
+        [
+            (1, 1),
+            (1, 2),
+            (1, 3),
+            (1, 4),
+            (1, 5),
+            (2, 1),
+            (2, 2),
+            (2, 3),
+            (2, 4),
+            (2, 5),
+            (3, 1),
+            (3, 2),
+            (3, 3),
+            (3, 4),
+            (3, 5),
+            (4, 1),
+            (4, 2),
+            (4, 3),
+            (4, 4),
+            (4, 5),
+            (5, 1),
+            (5, 2),
+            (5, 3),
+            (5, 4),
+            (5, 5),
+        ]
+    )
