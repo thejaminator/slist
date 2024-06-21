@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
-from ctypes import cast
+from dataclasses import dataclass
 import random
 import re
 import statistics
@@ -29,6 +29,7 @@ from typing import (
 
 # Needed for https://github.com/python/typing_extensions/issues/7
 from typing_extensions import NamedTuple
+
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -64,6 +65,18 @@ class Addable(Protocol):
 
 
 CanAdd = TypeVar("CanAdd", bound=Addable)
+
+
+@dataclass(frozen=True)
+class AverageStats:
+    average: float
+    standard_deviation: float
+    upper_confidence_interval_95: float
+    lower_confidence_interval_95: float
+    count: int
+
+    def __str__(self) -> str:
+        return f"Average: {self.average}, SD: {self.standard_deviation}, 95% CI: ({self.lower_confidence_interval_95}, {self.upper_confidence_interval_95})"
 
 
 class Comparable(Protocol):
@@ -662,7 +675,7 @@ class Slist(List[A]):
     async def par_map_async(self, func: Callable[[A], typing.Awaitable[B]]) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
         return Slist(await asyncio.gather(*[func(item) for item in self]))
-    
+
     async def gather(self: Sequence[typing.Awaitable[B]]) -> Slist[B]:
         """Awaits for all results"""
         return Slist(await asyncio.gather(*self))
@@ -706,11 +719,32 @@ class Slist(List[A]):
     def average_or_raise(
         self: Sequence[Union[int, float, bool]],
     ) -> float:
-        """Returns None when the list is empty"""
+        """Raises when the list is empty"""
         this = typing.cast(Slist[Union[int, float, bool]], self)
         if this.length == 0:
             raise ValueError("Cannot get average of empty list")
         return this.sum() / this.length
+
+    def statistics_or_raise(
+        self: Sequence[Union[int, float, bool]],
+    ) -> AverageStats:
+        """Raises when the list is empty"""
+        this = typing.cast(Slist[Union[int, float, bool]], self)
+        if this.length == 0:
+            raise ValueError("Cannot get average of empty list")
+        average = this.average_or_raise()
+        standard_deviation = this.standard_deviation()
+        assert standard_deviation is not None
+        standard_error = standard_deviation / ((this.length) ** 0.5)
+        upper_ci = average + 1.96 * standard_error
+        lower_ci = average - 1.96 * standard_error
+        return AverageStats(
+            average=average,
+            standard_deviation=standard_deviation,
+            upper_confidence_interval_95=upper_ci,
+            lower_confidence_interval_95=lower_ci,
+            count=this.length,
+        )
 
     def standard_deviation(self: Slist[Union[int, float]]) -> Optional[float]:
         """Returns None when the list is empty"""

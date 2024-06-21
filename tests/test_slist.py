@@ -1,6 +1,7 @@
 import pytest
 
 from slist import Slist, identity
+import numpy as np
 
 
 def test_split_proportion():
@@ -285,3 +286,18 @@ def test_product():
             (5, 5),
         ]
     )
+
+
+def test_statistics_or_raise():
+    numbers = Slist([1, 2, 3, 4, 5])
+    results = numbers.statistics_or_raise()
+    assert results.average == 3
+    assert results.count == 5
+
+    # convert the above to use numpy roughly equal
+    assert np.isclose(results.upper_confidence_interval_95, 4.38, atol=0.01)
+    assert np.isclose(results.lower_confidence_interval_95, 1.61, atol=0.01)
+
+    empty = Slist([])
+    with pytest.raises(ValueError):
+        empty.statistics_or_raise()
