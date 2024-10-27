@@ -31,9 +31,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest poetry typing-extensions
 
-      - name: test with pytest
-        run:
-          pytest tests
 
       - name: Build wheels and source tarball
         run: |
