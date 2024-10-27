@@ -99,6 +99,24 @@ async def test_par_map_async():
     assert result == Slist([2, 4, 6])
 
 
+@pytest.mark.asyncio
+async def test_par_map_async_max_parallel():
+    async def func(x: int) -> int:
+        return x * 2
+
+    result = await Slist([1, 2, 3]).par_map_async(func, max_par=1)
+    assert result == Slist([2, 4, 6])
+
+
+@pytest.mark.asyncio
+async def test_par_map_async_max_parallel_tqdm():
+    async def func(x: int) -> int:
+        return x * 2
+
+    result = await Slist([1, 2, 3]).par_map_async(func, max_par=1, tqdm=True)
+    assert result == Slist([2, 4, 6])
+
+
 def test_grouped():
     test_list = Slist([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     assert test_list.grouped(2) == Slist([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]])

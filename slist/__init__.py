@@ -6,7 +6,6 @@ from dataclasses import dataclass
 import random
 import re
 import statistics
-import sys
 import typing
 from collections import OrderedDict
 
@@ -672,9 +671,48 @@ class Slist(List[A]):
             results.append(fut.result())
         return Slist(results)
 
-    async def par_map_async(self, func: Callable[[A], typing.Awaitable[B]]) -> Slist[B]:
+    async def par_map_async(
+        self, func: Callable[[A], typing.Awaitable[B]], max_par: int | None = None, tqdm: bool = False
+    ) -> Slist[B]:
         """Applies the async function to each element. Awaits for all results."""
-        return Slist(await asyncio.gather(*[func(item) for item in self]))
+        if max_par is None:
+            if tqdm:
+                import tqdm as tqdm_module
+
+                tqdm_counter = tqdm_module.tqdm(total=len(self))
+
+                async def func_with_tqdm(item: A) -> B:
+                    result = await func(item)
+                    tqdm_counter.update(1)
+                    return result
+
+                return Slist(await asyncio.gather(*[func_with_tqdm(item) for item in self]))
+            else:
+                # todo: clean up branching
+                return Slist(await asyncio.gather(*[func(item) for item in self]))
+
+        else:
+            assert max_par > 0, "max_par must be greater than 0"
+            sema = asyncio.Semaphore(max_par)
+            if tqdm:
+                import tqdm as tqdm_module
+
+                tqdm_counter = tqdm_module.tqdm(total=len(self))
+
+                async def func_with_semaphore(item: A) -> B:
+                    async with sema:
+                        result = await func(item)
+                        tqdm_counter.update(1)
+                        return result
+
+            else:
+
+                async def func_with_semaphore(item: A) -> B:
+                    async with sema:
+                        return await func(item)
+
+            result = await self.par_map_async(func_with_semaphore)
+            return result
 
     async def gather(self: Sequence[typing.Awaitable[B]]) -> Slist[B]:
         """Awaits for all results"""
