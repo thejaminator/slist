@@ -618,10 +618,30 @@ class Slist(List[A]):
         return dict(self)
 
     def to_set(self) -> typing.Set[A]:
+        """
+        Convert the Slist to a set.
+        """
         return set(self)
 
     @staticmethod
     def from_dict(a_dict: typing.Dict[CanHash, A]) -> Slist[Tuple[CanHash, A]]:
+        """Convert a dictionary to a Slist of tuple values.
+
+        Parameters
+        ----------
+        a_dict : Dict[CanHash, A]
+            Dictionary to convert
+
+        Returns
+        -------
+        Slist[Tuple[CanHash, A]]
+            List of key-value tuples from the dictionary
+
+        Examples
+        --------
+        >>> Slist.from_dict({1: 'a', 2: 'b'})
+        Slist([(1, 'a'), (2, 'b')])
+        """
         return Slist(tup for tup in a_dict.items())
 
     def for_each_enumerate(self, func: Callable[[int, A], None]) -> Slist[A]:
@@ -826,16 +846,51 @@ class Slist(List[A]):
             return None
 
     def pairwise(self) -> Slist[Tuple[A, A]]:
-        """From more-itertools
-        Returns an iterator of paired items, overlapping, from the original"""
+        """Return overlapping pairs of consecutive elements.
+
+        Returns
+        -------
+        Slist[Tuple[A, A]]
+            List of tuples containing consecutive overlapping pairs
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).pairwise()
+        Slist([(1, 2), (2, 3), (3, 4)])
+        >>> Slist([1]).pairwise()
+        Slist([])
+        >>> Slist([]).pairwise()
+        Slist([])
+
+        Notes
+        -----
+        Inspired by more-itertools pairwise function. Creates an iterator of
+        overlapping pairs from the input sequence.
+        """
         a, b = tee(self)
         next(b, None)
         return Slist(zip(a, b))
 
     def print_length(self, printer: Callable[[str], None] = print, prefix: str = "Slist Length: ") -> Slist[A]:
-        """Prints the length of the list, and returns the original list
-        e.g. Slist([1,2,3]).print_length()
-        >>> Slist Length: 3
+        """Print the length of the list and return the original list.
+
+        Parameters
+        ----------
+        printer : Callable[[str], None], optional
+            Function to print the output, by default print
+        prefix : str, optional
+            Prefix string before the length, by default "Slist Length: "
+
+        Returns
+        -------
+        Slist[A]
+            The original list unchanged
+
+        Examples
+        --------
+        >>> Slist([1,2,3]).print_length()
+        Slist Length: 3
+        Slist([1, 2, 3])
         """
         string = f"{prefix}{len(self)}"
         printer(string)
@@ -1556,7 +1611,22 @@ class Slist(List[A]):
             return result
 
     async def gather(self: Sequence[typing.Awaitable[B]]) -> Slist[B]:
-        """Awaits for all results"""
+        """Gather and await all awaitables in the sequence.
+
+        Returns
+        -------
+        Slist[B]
+            A new Slist containing the awaited results
+
+        Examples
+        --------
+        >>> async def slow_value(x):
+        ...     await asyncio.sleep(0.1)
+        ...     return x
+        >>> awaitables = [slow_value(1), slow_value(2), slow_value(3)]
+        >>> await Slist(awaitables).gather()
+        Slist([1, 2, 3])
+        """
         return Slist(await asyncio.gather(*self))
 
     def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> Slist[A]:
@@ -1796,16 +1866,48 @@ class Slist(List[A]):
         return reduce(lambda a, b: func(b, a), reversed(self), acc)
 
     def sum_option(self: Sequence[CanAdd]) -> Optional[CanAdd]:
-        """Folds left with addition. Returns None if the list is empty"""
+        """Sums the elements of the sequence. Returns None if the sequence is empty.
+
+        Returns
+        -------
+        Optional[CanAdd]
+            The sum of all elements in the sequence, or None if the sequence is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).sum_option()
+        6
+        >>> Slist([]).sum_option()
+        None
+        """
         return reduce(lambda a, b: a + b, self) if len(self) > 0 else None
 
     def sum_or_raise(self: Sequence[CanAdd]) -> CanAdd:
-        """Folds left with addition. Raises if the list is empty"""
+        """Sums the elements of the sequence. Raises an error if the sequence is empty.
+
+        Returns
+        -------
+        CanAdd
+            The sum of all elements in the sequence
+
+        Raises
+        ------
+        AssertionError
+            If the sequence is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).sum_or_raise()
+        6
+        >>> Slist([]).sum_or_raise()  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+        AssertionError: Cannot fold empty list
+        """
         assert len(self) > 0, "Cannot fold empty list"
         return reduce(lambda a, b: a + b, self)
 
     def split_by(self, predicate: Callable[[A], bool]) -> Tuple[Slist[A], Slist[A]]:
-        """Split list into two lists based on a predicate.
+        """Split list into two lists based on a predicate. Left list contains items that match the predicate.
 
         Parameters
         ----------
@@ -1835,8 +1937,18 @@ class Slist(List[A]):
         return left, right
 
     def split_on(self, predicate: Callable[[A], bool]) -> Slist[Slist[A]]:
-        """Splits the list into sections based on the predicate,
-        items matching the predicate are not included in the output"""
+        """Split list into sublists based on a predicate.
+
+        Returns
+        -------
+        Slist[Slist[A]]
+            List of sublists
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4, 5]).split_on(lambda x: x % 2 == 0)
+        Slist([Slist([1, 3, 5]), Slist([2, 4])])
+        """
         output: Slist[Slist[A]] = Slist()
         current = Slist[A]()
         for item in self:
