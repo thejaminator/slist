@@ -42,6 +42,24 @@ plugins:
             show_category_heading: true
             show_bases: true
             heading_level: 2
+            members_order: source
+            show_if_no_docstring: true
+            separate_signature: true
+            docstring_section_style: list
+            show_root_toc_entry: true
+            show_root_members_full_path: false
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: table
+            members_order: source
+            show_signature_annotations: true
+            signature_crossrefs: true
+            filters: ["!^_"]
+            docstring_style: google
+            docstring_section_style: spacy
+            show_docstring_attributes: true
+            show_docstring_examples: false
+            show_docstring_returns: false
 
 markdown_extensions:
   - pymdownx.highlight:
