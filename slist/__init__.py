@@ -74,6 +74,7 @@ class AverageStats:
     standard_deviation: float
     upper_confidence_interval_95: float
     lower_confidence_interval_95: float
+    average_plus_minus_95: float
     count: int
 
     def __str__(self) -> str:
@@ -563,11 +564,11 @@ class Slist(List[A]):
 
         return non_dupes.shuffle(seed) + dupes.shuffle(seed)
 
-    def __add__(self, other: Slist[B]) -> Slist[Union[A, B]]:  # type: ignore
+    def __add__(self, other: Sequence[B]) -> Slist[Union[A, B]]:  # type: ignore
         return Slist(super().__add__(other))  # type: ignore
 
-    def add(self, other: Slist[B]) -> Slist[Union[A, B]]:
-        return self + other  # type: ignore
+    def add(self, other: Sequence[B]) -> Slist[Union[A, B]]:
+        return self + other
 
     def add_one(self, other: B) -> Slist[Union[A, B]]:
         new: Slist[Union[A, B]] = self.copy()  # type: ignore
@@ -612,13 +613,6 @@ class Slist(List[A]):
 
     def distinct(self: Sequence[CanHash]) -> Slist[CanHash]:
         """Deduplicates items. Preserves order."""
-        return self.distinct_unsafe()  # type: ignore
-
-    def distinct_unsafe(self: Sequence[CanHash]) -> Slist[CanHash]:
-        """Deduplicates items. Preserves order.
-        To be deprecated in favour of distinct
-        Previously was type-unsafe due to mypy bug
-        """
         seen = set()
         output = Slist[CanHash]()
         for item in self:
@@ -766,12 +760,14 @@ class Slist(List[A]):
         standard_error = standard_deviation / ((this.length) ** 0.5)
         upper_ci = average + 1.96 * standard_error
         lower_ci = average - 1.96 * standard_error
+        average_plus_minus_95 = 1.96 * standard_error
         return AverageStats(
             average=average,
             standard_deviation=standard_deviation,
             upper_confidence_interval_95=upper_ci,
             lower_confidence_interval_95=lower_ci,
             count=this.length,
+            average_plus_minus_95=average_plus_minus_95,
         )
 
     def standard_deviation(self: Slist[Union[int, float]]) -> Optional[float]:
