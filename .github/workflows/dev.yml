@@ -40,9 +40,5 @@ jobs:
           pip install tqdm
           pip install numpy
 
-      - uses: jakebailey/pyright-action@v1
-        with:
-          version: latest
-
       - name: list files
         run: ls -l .
