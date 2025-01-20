@@ -38,14 +38,3 @@ jobs:
           git config --global user.email "github-actions@github.com"
           poetry run mkdocs build --verbose
           poetry run mkdocs gh-deploy --force --verbose 
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          timeout: 600000
-          error_count: 10
-          reporting_interval: 5000
-          artifact_name: github-pages
-          preview: false
-        env:
-          GITHUB_PAGES: true 
