@@ -94,51 +94,265 @@ class Comparable(Protocol):
 class Slist(List[A]):
     @staticmethod
     def one(element: A) -> Slist[A]:
+        """Create a new Slist with a single element.
+
+        Parameters
+        ----------
+        element : A
+            The element to create the list with
+
+        Returns
+        -------
+        Slist[A]
+            A new Slist containing only the given element
+
+        Examples
+        --------
+        >>> Slist.one(5)
+        Slist([5])
+        """
         return Slist([element])
 
     @staticmethod
     def one_option(element: Optional[A]) -> Slist[A]:
-        """Returns a list with one element, or an empty slist if the element is None
-        Equal to Slist.one(element).flatten_option()"""
+        """Create a Slist with one element if it exists, otherwise empty list.
+
+        Equal to ``Slist.one(element).flatten_option()``
+
+        Parameters
+        ----------
+        element : Optional[A]
+            The element to create the list with, if it exists
+
+        Returns
+        -------
+        Slist[A]
+            A new Slist containing the element if it exists, otherwise empty
+
+        Examples
+        --------
+        >>> Slist.one_option(5)
+        Slist([5])
+        >>> Slist.one_option(None)
+        Slist([])
+        """
         return Slist([element]) if element is not None else Slist()
 
     def any(self, predicate: Callable[[A], bool]) -> bool:
+        """Check if any element satisfies the predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that takes an element and returns True/False
+
+        Returns
+        -------
+        bool
+            True if any element satisfies the predicate, False otherwise
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).any(lambda x: x > 3)
+        True
+        >>> Slist([1, 2, 3]).any(lambda x: x > 3)
+        False
+        """
         for x in self:
             if predicate(x):
                 return True
         return False
 
     def all(self, predicate: Callable[[A], bool]) -> bool:
+        """Check if all elements satisfy the predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that takes an element and returns True/False
+
+        Returns
+        -------
+        bool
+            True if all elements satisfy the predicate, False otherwise
+
+        Examples
+        --------
+        >>> Slist([2, 4, 6]).all(lambda x: x % 2 == 0)
+        True
+        >>> Slist([2, 3, 4]).all(lambda x: x % 2 == 0)
+        False
+        """
         for x in self:
             if not predicate(x):
                 return False
         return True
 
     def filter(self, predicate: Callable[[A], bool]) -> Slist[A]:
+        """Create a new Slist with only elements that satisfy the predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that takes an element and returns True/False
+
+        Returns
+        -------
+        Slist[A]
+            A new Slist containing only elements that satisfy the predicate
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).filter(lambda x: x % 2 == 0)
+        Slist([2, 4])
+        """
         return Slist(filter(predicate, self))
 
     def map(self, func: Callable[[A], B]) -> Slist[B]:
+        """Transform each element using the given function.
+
+        Parameters
+        ----------
+        func : Callable[[A], B]
+            Function to apply to each element
+
+        Returns
+        -------
+        Slist[B]
+            A new Slist with transformed elements
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).map(lambda x: x * 2)
+        Slist([2, 4, 6])
+        """
         return Slist(func(item) for item in self)
 
     def product(self: Sequence[A], other: Sequence[B]) -> Slist[Tuple[A, B]]:
+        """Compute the cartesian product with another sequence.
+
+        Parameters
+        ----------
+        other : Sequence[B]
+            The sequence to compute the product with
+
+        Returns
+        -------
+        Slist[Tuple[A, B]]
+            A new Slist containing tuples of all combinations
+
+        Examples
+        --------
+        >>> Slist([1, 2]).product(['a', 'b'])
+        Slist([(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')])
+        """
         return Slist((a, b) for a in self for b in other)
 
     def map_2(self: Sequence[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
+        """Map a function over a sequence of 2-tuples.
+
+        Parameters
+        ----------
+        func : Callable[[B, C], D]
+            Function that takes two arguments and returns a value
+
+        Returns
+        -------
+        Slist[D]
+            A new Slist with the results of applying func to each tuple
+
+        Examples
+        --------
+        >>> pairs = Slist([(1, 2), (3, 4)])
+        >>> pairs.map_2(lambda x, y: x + y)
+        Slist([3, 7])
+        """
         return Slist(func(b, c) for b, c in self)
 
     def map_enumerate(self, func: Callable[[int, A], B]) -> Slist[B]:
+        """Map a function over the list with indices.
+
+        Parameters
+        ----------
+        func : Callable[[int, A], B]
+            Function that takes an index and value and returns a new value
+
+        Returns
+        -------
+        Slist[B]
+            A new Slist with the results of applying func to each (index, value) pair
+
+        Examples
+        --------
+        >>> Slist(['a', 'b', 'c']).map_enumerate(lambda i, x: f"{i}:{x}")
+        Slist(['0:a', '1:b', '2:c'])
+        """
         return Slist(func(idx, item) for idx, item in enumerate(self))
 
     def flatten_option(self: Sequence[Optional[B]]) -> Slist[B]:
+        """Remove None values from a sequence of optional values.
+
+        Parameters
+        ----------
+        self : Sequence[Optional[B]]
+            A sequence containing optional values
+
+        Returns
+        -------
+        Slist[B]
+            A new Slist with all non-None values
+
+        Examples
+        --------
+        >>> Slist([1, None, 3, None, 5]).flatten_option()
+        Slist([1, 3, 5])
+        """
         return Slist([item for item in self if item is not None])
 
     def flat_map_option(self, func: Callable[[A], Optional[B]]) -> Slist[B]:
-        """Runs the provided function, and filters out the Nones"""
+        """Apply a function that returns optional values and filter out Nones.
+
+        Parameters
+        ----------
+        func : Callable[[A], Optional[B]]
+            Function that takes a value and returns an optional value
+
+        Returns
+        -------
+        Slist[B]
+            A new Slist with all non-None results of applying func
+
+        Examples
+        --------
+        >>> def safe_sqrt(x: float) -> Optional[float]:
+        ...     return x ** 0.5 if x >= 0 else None
+        >>> Slist([4, -1, 9, -4, 16]).flat_map_option(safe_sqrt)
+        Slist([2.0, 3.0, 4.0])
+        """
         return self.map(func).flatten_option()
 
     def upsample_if(self, predicate: Callable[[A], bool], upsample_by: int) -> Slist[A]:
-        """Upsamples the list by the given factor if the predicate is true"""
-        assert upsample_by > 0
+        """Repeat elements that satisfy a predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that determines which elements to upsample
+        upsample_by : int
+            Number of times to repeat each matching element
+
+        Returns
+        -------
+        Slist[A]
+            A new Slist with matching elements repeated
+
+        Examples
+        --------
+        >>> numbers = Slist([1, 2, 3, 4])
+        >>> numbers.upsample_if(lambda x: x % 2 == 0, upsample_by=2)
+        Slist([1, 2, 2, 3, 4, 4])
+        """
+        assert upsample_by > 0, "upsample_by must be positive"
         new_list = Slist[A]()
         for item in self:
             if predicate(item):
@@ -149,6 +363,24 @@ class Slist(List[A]):
         return new_list
 
     def flatten_list(self: Sequence[Sequence[B]]) -> Slist[B]:
+        """Flatten a sequence of sequences into a single list.
+
+        Parameters
+        ----------
+        self : Sequence[Sequence[B]]
+            A sequence of sequences to flatten
+
+        Returns
+        -------
+        Slist[B]
+            A new Slist with all elements from all sequences
+
+        Examples
+        --------
+        >>> nested = Slist([[1, 2], [3, 4], [5, 6]])
+        >>> nested.flatten_list()
+        Slist([1, 2, 3, 4, 5, 6])
+        """
         flat_list: Slist[B] = Slist()
         for sublist in self:
             for item in sublist:
@@ -156,65 +388,143 @@ class Slist(List[A]):
         return flat_list
 
     def enumerated(self) -> Slist[Tuple[int, A]]:
+        """Create a list of tuples containing indices and values.
+
+        Returns
+        -------
+        Slist[Tuple[int, A]]
+            A new Slist of (index, value) tuples
+
+        Examples
+        --------
+        >>> Slist(['a', 'b', 'c']).enumerated()
+        Slist([(0, 'a'), (1, 'b'), (2, 'c')])
+        """
         return Slist(enumerate(self))
 
     def shuffle(self, seed: Optional[str] = None) -> Slist[A]:
+        """Create a new randomly shuffled list.
+
+        Parameters
+        ----------
+        seed : Optional[str], optional
+            Random seed for reproducibility, by default None
+
+        Returns
+        -------
+        Slist[A]
+            A new Slist with elements in random order
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).shuffle(seed="42")  # Reproducible shuffle
+        Slist([2, 4, 1, 3])
+        """
         new = self.copy()
         random.Random(seed).shuffle(new)
-        return Slist(new)  # shuffle makes it back into a list instead of Slist
+        return Slist(new)
 
     def choice(
         self,
         seed: Optional[str] = None,
         weights: Optional[List[int]] = None,
     ) -> A:
+        """Randomly select an element from the list.
+
+        Parameters
+        ----------
+        seed : Optional[str], optional
+            Random seed for reproducibility, by default None
+        weights : Optional[List[int]], optional
+            List of weights for weighted random selection, by default None
+
+        Returns
+        -------
+        A
+            A randomly selected element
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).choice(seed="42")  # Reproducible choice
+        2
+        >>> Slist([1, 2, 3]).choice(weights=[1, 2, 1])  # Weighted choice
+        2  # More likely to select 2 due to higher weight
+        """
         if weights:
             return random.Random(seed).choices(self, weights=weights, k=1)[0]
         else:
             return random.Random(seed).choice(self)
 
     def sample(self, n: int, seed: Optional[str] = None) -> Slist[A]:
+        """Randomly sample n elements from the list without replacement.
+
+        Parameters
+        ----------
+        n : int
+            Number of elements to sample
+        seed : Optional[str], optional
+            Random seed for reproducibility, by default None
+
+        Returns
+        -------
+        Slist[A]
+            A new Slist with n randomly selected elements
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4, 5]).sample(3, seed="42")
+        Slist([2, 4, 1])
+        """
         return Slist(random.Random(seed).sample(self, n))
 
     def for_each(self, func: Callable[[A], None]) -> Slist[A]:
-        """Runs an effect on each element, and returns the original list
-        e.g. Slist([1,2,3]).foreach(print)"""
+        """Apply a side-effect function to each element and return the original list.
+
+        Parameters
+        ----------
+        func : Callable[[A], None]
+            Function to apply to each element for its side effects
+
+        Returns
+        -------
+        Slist[A]
+            The original list, unchanged
+
+        Examples
+        --------
+        >>> nums = Slist([1, 2, 3])
+        >>> nums.for_each(print)  # Prints each number
+        1
+        2
+        3
+        >>> nums  # Original list is unchanged
+        Slist([1, 2, 3])
+        """
         for item in self:
             func(item)
         return self
 
     def group_by(self, key: Callable[[A], CanHash]) -> Slist[Group[CanHash, Slist[A]]]:
-        """
-        Groups the list by the given key
-        Returns a NamedTuple with attributes
-            key: The key that was used to group
-            values: The values that were grouped
+        """Group elements by a key function.
 
+        Parameters
+        ----------
+        key : Callable[[A], CanHash]
+            Function to compute the group key for each element
+
+        Returns
+        -------
+        Slist[Group[CanHash, Slist[A]]]
+            A new Slist of Groups, where each Group contains:
+                - key: The grouping key
+                - values: Slist of elements in that group
 
         Examples
-        ----
-            class Animal:
-                def __init__(self, name: str, age: int):
-                    self.name = name
-                    self.age = age
-
-            animals = Slist(
-                [
-                    Animal("cat", 1),
-                    Animal("cat", 2),
-                    Animal("dog", 1),
-                ]
-            )
-            # group_by name, then average out the age
-            result = animals.group_by(lambda animal: animal.name).map(
-                lambda group: group.map_values(len)
-            )
-            assert result == Slist(
-                [
-                    ("cat", 2),
-                    ("dog", 1),
-                ]
-            )
+        --------
+        >>> numbers = Slist([1, 2, 3, 4])
+        >>> groups = numbers.group_by(lambda x: x % 2)  # Group by even/odd
+        >>> groups.map(lambda g: (g.key, list(g.values)))
+        Slist([(1, [1, 3]), (0, [2, 4])])
         """
         d: typing.OrderedDict[CanHash, Slist[A]] = OrderedDict()
         for elem in self:
@@ -232,20 +542,69 @@ class Slist(List[A]):
     def ungroup(self: Slist[Group[Any, Sequence[C]]]) -> Slist[C]: ...
 
     def ungroup(self: Slist[Group[Any, Slist[C]]] | Slist[Group[Any, Sequence[C]]]) -> Slist[C]:
-        """Ungroups the list of groups"""
+        """Convert a list of groups back into a flat list of values.
+
+        Parameters
+        ----------
+        self : Slist[Group[Any, Slist[C]]] | Slist[Group[Any, Sequence[C]]]
+            A list of groups to ungroup
+
+        Returns
+        -------
+        Slist[C]
+            A flat list containing all values from all groups
+
+        Examples
+        --------
+        >>> groups = Slist([Group(0, [1, 2]), Group(1, [3, 4])])
+        >>> groups.ungroup()
+        Slist([1, 2, 3, 4])
+        """
         casted: Slist[Group[Any, Slist[C]]] = self  # type: ignore
         return casted.map_2(lambda _, values: values).flatten_list()
 
     def map_on_group_values(self: Slist[Group[B, Slist[C]]], func: Callable[[Slist[C]], D]) -> Slist[Group[B, D]]:
-        # Apply a function on the group's vsalues
+        """Apply a function to the values of each group.
+
+        Parameters
+        ----------
+        func : Callable[[Slist[C]], D]
+            Function to apply to each group's values
+
+        Returns
+        -------
+        Slist[Group[B, D]]
+            A new list of groups with transformed values
+
+        Examples
+        --------
+        >>> groups = Slist([1, 2, 3, 4]).group_by(lambda x: x % 2)
+        >>> groups.map_on_group_values(lambda values: sum(values))
+        Slist([Group(key=1, values=4), Group(key=0, values=6)])
+        """
         return self.map(lambda group: group.map_values(func))
 
     def map_on_group_values_list(
         self: Slist[Group[A, Sequence[B]]], func: Callable[[B], C]
     ) -> Slist[Group[A, Sequence[C]]]:
-        # If your group's values are a list, and you want to apply a function on each element of the list
-        # e.g. Slist([Group(1, [1, 2, 3]), Group(2, [4, 5, 6])]).map_on_group_values_list(lambda x: x + 1)
-        # Slist([Group(1, [2, 3, 4]), Group(2, [5, 6, 7])])
+        """Apply a function to each element in each group's values.
+
+        Parameters
+        ----------
+        func : Callable[[B], C]
+            Function to apply to each element in each group's values
+
+        Returns
+        -------
+        Slist[Group[A, Sequence[C]]]
+            A new list of groups with transformed elements
+
+        Examples
+        --------
+        >>> groups = Slist([Group(1, [1, 2]), Group(2, [3, 4])])
+        >>> groups.map_on_group_values_list(lambda x: x * 2)
+        Slist([Group(1, [2, 4]), Group(2, [6, 8])])
+        """
         return self.map(lambda group: group.map_values(lambda values: Slist(values).map(func)))
 
     def to_dict(self: Sequence[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
@@ -266,19 +625,91 @@ class Slist(List[A]):
         return Slist(tup for tup in a_dict.items())
 
     def for_each_enumerate(self, func: Callable[[int, A], None]) -> Slist[A]:
-        """Runs an effect on each element, and returns the original list
-        e.g. Slist([1,2,3]).foreach(print)"""
+        """Apply a side-effect function to each element with its index.
+
+        Parameters
+        ----------
+        func : Callable[[int, A], None]
+            Function taking an index and value, applied for side effects
+
+        Returns
+        -------
+        Slist[A]
+            The original list, unchanged
+
+        Examples
+        --------
+        >>> nums = Slist(['a', 'b', 'c'])
+        >>> nums.for_each_enumerate(lambda i, x: print(f"{i}: {x}"))
+        0: a
+        1: b
+        2: c
+        >>> nums  # Original list is unchanged
+        Slist(['a', 'b', 'c'])
+        """
         for idx, item in enumerate(self):
             func(idx, item)
         return self
 
     def max_option(self: Sequence[CanCompare]) -> Optional[CanCompare]:
+        """Get the maximum element if it exists.
+
+        Returns
+        -------
+        Optional[CanCompare]
+            Maximum element, or None if list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 3, 2]).max_option()
+        3
+        >>> Slist([]).max_option()
+        None
+        """
         return max(self) if self else None
 
     def max_by(self, key: Callable[[A], CanCompare]) -> Optional[A]:
+        """Get the element with maximum value by key function.
+
+        Parameters
+        ----------
+        key : Callable[[A], CanCompare]
+            Function to compute comparison value for each element
+
+        Returns
+        -------
+        Optional[A]
+            Element with maximum key value, or None if list is empty
+
+        Examples
+        --------
+        >>> Slist(['a', 'bbb', 'cc']).max_by(len)
+        'bbb'
+        >>> Slist([]).max_by(len)
+        None
+        """
         return max(self, key=key) if self.length > 0 else None
 
     def max_by_ordering(self, ordering: Callable[[A, A], bool]) -> Optional[A]:
+        """Get maximum element using custom ordering function.
+
+        Parameters
+        ----------
+        ordering : Callable[[A, A], bool]
+            Function that returns True if first argument should be considered larger
+
+        Returns
+        -------
+        Optional[A]
+            Maximum element by ordering, or None if list is empty
+
+        Examples
+        --------
+        >>> # Custom ordering: consider numbers closer to 10 as "larger"
+        >>> nums = Slist([1, 5, 8, 15])
+        >>> nums.max_by_ordering(lambda x, y: abs(x-10) < abs(y-10))
+        8
+        """
         theMax: Optional[A] = self.first_option
         for currentItem in self:
             if theMax is not None:
@@ -287,21 +718,108 @@ class Slist(List[A]):
         return theMax
 
     def min_option(self: Sequence[CanCompare]) -> Optional[CanCompare]:
+        """Get the minimum element if it exists.
+
+        Returns
+        -------
+        Optional[CanCompare]
+            Minimum element, or None if list is empty
+
+        Examples
+        --------
+        >>> Slist([3, 1, 2]).min_option()
+        1
+        >>> Slist([]).min_option()
+        None
+        """
         return min(self) if self else None
 
     def min_by(self, key: Callable[[A], CanCompare]) -> Optional[A]:
+        """Get the element with minimum value by key function.
+
+        Parameters
+        ----------
+        key : Callable[[A], CanCompare]
+            Function to compute comparison value for each element
+
+        Returns
+        -------
+        Optional[A]
+            Element with minimum key value, or None if list is empty
+
+        Examples
+        --------
+        >>> Slist(['aaa', 'b', 'cc']).min_by(len)
+        'b'
+        >>> Slist([]).min_by(len)
+        None
+        """
         return min(self, key=key) if self.length > 0 else None
 
     def min_by_ordering(self: Slist[CanCompare]) -> Optional[CanCompare]:
+        """Get minimum element using default ordering.
+
+        Returns
+        -------
+        Optional[CanCompare]
+            Minimum element, or None if list is empty
+
+        Examples
+        --------
+        >>> Slist([3, 1, 2]).min_by_ordering()
+        1
+        >>> Slist([]).min_by_ordering()
+        None
+        """
         return min(self) if self else None
 
     def get(self, index: int, or_else: B) -> Union[A, B]:
+        """Get element at index with fallback value.
+
+        Parameters
+        ----------
+        index : int
+            Index to get element from
+        or_else : B
+            Value to return if index is out of bounds
+
+        Returns
+        -------
+        Union[A, B]
+            Element at index if it exists, otherwise or_else value
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).get(1, -1)
+        2
+        >>> Slist([1, 2, 3]).get(5, -1)
+        -1
+        """
         try:
             return self.__getitem__(index)
         except IndexError:
             return or_else
 
     def get_option(self, index: int) -> Optional[A]:
+        """Get element at index if it exists.
+
+        Parameters
+        ----------
+        index : int
+            Index to get element from
+
+        Returns
+        -------
+        Optional[A]
+            Element at index if it exists, otherwise None
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).get_option(1)
+        2
+        >>> Slist([1, 2, 3]).get_option(5)
+        None
+        """
         try:
             return self.__getitem__(index)
         except IndexError:
@@ -325,18 +843,72 @@ class Slist(List[A]):
 
     @property
     def is_empty(self) -> bool:
+        """Check if the list is empty.
+
+        Returns
+        -------
+        bool
+            True if the list has no elements
+
+        Examples
+        --------
+        >>> Slist([]).is_empty
+        True
+        >>> Slist([1]).is_empty
+        False
+        """
         return len(self) == 0
 
     @property
     def not_empty(self) -> bool:
+        """Check if the list has any elements.
+
+        Returns
+        -------
+        bool
+            True if the list has at least one element
+
+        Examples
+        --------
+        >>> Slist([1]).not_empty
+        True
+        >>> Slist([]).not_empty
+        False
+        """
         return len(self) > 0
 
     @property
     def length(self) -> int:
+        """Get the number of elements in the list.
+
+        Returns
+        -------
+        int
+            Number of elements
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).length
+        3
+        """
         return len(self)
 
     @property
     def last_option(self) -> Optional[A]:
+        """Get the last element if it exists.
+
+        Returns
+        -------
+        Optional[A]
+            Last element, or None if list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).last_option
+        3
+        >>> Slist([]).last_option
+        None
+        """
         try:
             return self.__getitem__(-1)
         except IndexError:
@@ -344,6 +916,20 @@ class Slist(List[A]):
 
     @property
     def first_option(self) -> Optional[A]:
+        """Get the first element if it exists.
+
+        Returns
+        -------
+        Optional[A]
+            First element, or None if list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).first_option
+        1
+        >>> Slist([]).first_option
+        None
+        """
         try:
             return self.__getitem__(0)
         except IndexError:
@@ -351,84 +937,196 @@ class Slist(List[A]):
 
     @property
     def mode_option(self) -> Optional[A]:
+        """Get the most common element if it exists.
+
+        Returns
+        -------
+        Optional[A]
+            Most frequent element, or None if list is empty or has no unique mode
+
+        Examples
+        --------
+        >>> Slist([1, 2, 2, 3]).mode_option
+        2
+        >>> Slist([1, 1, 2, 2]).mode_option  # No unique mode
+        None
+        >>> Slist([]).mode_option
+        None
+        """
         try:
             return statistics.mode(self)
         except statistics.StatisticsError:
             return None
 
     def mode_or_raise(self, exception: Exception = RuntimeError("List is empty")) -> A:
+        """Get the most common element or raise an exception.
+
+        Parameters
+        ----------
+        exception : Exception, optional
+            Exception to raise if no mode exists, by default RuntimeError("List is empty")
+
+        Returns
+        -------
+        A
+            Most frequent element
+
+        Raises
+        ------
+        Exception
+            If list is empty or has no unique mode
+
+        Examples
+        --------
+        >>> Slist([1, 2, 2, 3]).mode_or_raise()
+        2
+        >>> try:
+        ...     Slist([]).mode_or_raise()
+        ... except RuntimeError as e:
+        ...     print(str(e))
+        List is empty
+        """
         try:
             return statistics.mode(self)
         except statistics.StatisticsError:
             raise exception
 
     def first_or_raise(self, exception: Exception = RuntimeError("List is empty")) -> A:
+        """Get the first element or raise an exception.
+
+        Parameters
+        ----------
+        exception : Exception, optional
+            Exception to raise if list is empty, by default RuntimeError("List is empty")
+
+        Returns
+        -------
+        A
+            First element
+
+        Raises
+        ------
+        Exception
+            If list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).first_or_raise()
+        1
+        >>> try:
+        ...     Slist([]).first_or_raise()
+        ... except RuntimeError as e:
+        ...     print(str(e))
+        List is empty
+        """
         try:
             return self.__getitem__(0)
         except IndexError:
             raise exception
 
     def last_or_raise(self, exception: Exception = RuntimeError("List is empty")) -> A:
+        """Get the last element or raise an exception.
+
+        Parameters
+        ----------
+        exception : Exception, optional
+            Exception to raise if list is empty, by default RuntimeError("List is empty")
+
+        Returns
+        -------
+        A
+            Last element
+
+        Raises
+        ------
+        Exception
+            If list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).last_or_raise()
+        3
+        >>> try:
+        ...     Slist([]).last_or_raise()
+        ... except RuntimeError as e:
+        ...     print(str(e))
+        List is empty
+        """
         try:
             return self.__getitem__(-1)
         except IndexError:
             raise exception
 
     def find_one(self, predicate: Callable[[A], bool]) -> Optional[A]:
+        """Find first element that satisfies a predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that returns True for the desired element
+
+        Returns
+        -------
+        Optional[A]
+            First matching element, or None if no match found
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).find_one(lambda x: x > 2)
+        3
+        >>> Slist([1, 2, 3]).find_one(lambda x: x > 5)
+        None
+        """
         for item in self:
             if predicate(item):
                 return item
         return None
 
-    @overload
-    def zip(
-        self,
-        __second: Sequence[B],
-        __third: Sequence[C],
-        __fourth: Sequence[D],
-        __fifth: Sequence[E],
-    ) -> Slist[Tuple[A, B, C, D, E]]: ...
-
-    @overload
-    def zip(self, __second: Sequence[B], __third: Sequence[C], __fourth: Sequence[D]) -> Slist[Tuple[A, B, C, D]]: ...
-
-    @overload
-    def zip(self, __second: Sequence[B], __third: Sequence[C]) -> Slist[Tuple[A, B, C]]: ...
-
-    @overload
-    def zip(self, __second: Sequence[B]) -> Slist[Tuple[A, B]]: ...
-
-    def zip(self, *args: Sequence[Any]) -> Slist[Any]:
-        """Zips the list with the given sequences"""
-        all_args = args
-        # raise errors if all args are not the same length
-        for arg in all_args:
-            if len(arg) != len(self):
-                raise TypeError(f"Zipping with two different length sequences. {len(self)} != {len(arg)}")
-        return Slist(zip(self, *all_args))
-
-    def slice_with_bool(self, bools: Sequence[bool]) -> Slist[A]:
-        """Gets elements of the list with a sequence of booleans that are of the same length"""
-        return self.zip(bools).flat_map_option(lambda tup: tup[0] if tup[1] is True else None)
-
-    def find_one_or_raise(
-        self,
-        predicate: Callable[[A], bool],
-        exception: Exception = RuntimeError("Failed to find predicate"),
-    ) -> A:
-        result = self.find_one(predicate=predicate)
-        if result is not None:
-            return result
-        else:
-            raise exception
-
     def find_one_idx(self, predicate: Callable[[A], bool]) -> Optional[int]:
+        """Find index of first element that satisfies a predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that returns True for the desired element
+
+        Returns
+        -------
+        Optional[int]
+            Index of first matching element, or None if no match found
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).find_one_idx(lambda x: x > 2)
+        2
+        >>> Slist([1, 2, 3]).find_one_idx(lambda x: x > 5)
+        None
+        """
         for idx, item in enumerate(self):
             if predicate(item):
                 return idx
         return None
 
     def find_last_idx(self, predicate: Callable[[A], bool]) -> Optional[int]:
+        """Find index of last element that satisfies a predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that returns True for the desired element
+
+        Returns
+        -------
+        Optional[int]
+            Index of last matching element, or None if no match found
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 2, 1]).find_last_idx(lambda x: x == 2)
+        3
+        >>> Slist([1, 2, 3]).find_last_idx(lambda x: x > 5)
+        None
+        """
         indexes = []
         for idx, item in enumerate(self):
             if predicate(item):
@@ -440,6 +1138,35 @@ class Slist(List[A]):
         predicate: Callable[[A], bool],
         exception: Exception = RuntimeError("Failed to find predicate"),
     ) -> int:
+        """Find index of first element that satisfies a predicate or raise exception.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that returns True for the desired element
+        exception : Exception, optional
+            Exception to raise if no match found, by default RuntimeError("Failed to find predicate")
+
+        Returns
+        -------
+        int
+            Index of first matching element
+
+        Raises
+        ------
+        Exception
+            If no matching element is found
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).find_one_idx_or_raise(lambda x: x > 2)
+        2
+        >>> try:
+        ...     Slist([1, 2, 3]).find_one_idx_or_raise(lambda x: x > 5)
+        ... except RuntimeError as e:
+        ...     print(str(e))
+        Failed to find predicate
+        """
         result = self.find_one_idx(predicate=predicate)
         if result is not None:
             return result
@@ -451,6 +1178,35 @@ class Slist(List[A]):
         predicate: Callable[[A], bool],
         exception: Exception = RuntimeError("Failed to find predicate"),
     ) -> int:
+        """Find index of last element that satisfies a predicate or raise exception.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that returns True for the desired element
+        exception : Exception, optional
+            Exception to raise if no match found, by default RuntimeError("Failed to find predicate")
+
+        Returns
+        -------
+        int
+            Index of last matching element
+
+        Raises
+        ------
+        Exception
+            If no matching element is found
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 2, 1]).find_last_idx_or_raise(lambda x: x == 2)
+        3
+        >>> try:
+        ...     Slist([1, 2, 3]).find_last_idx_or_raise(lambda x: x > 5)
+        ... except RuntimeError as e:
+        ...     print(str(e))
+        Failed to find predicate
+        """
         result = self.find_last_idx(predicate=predicate)
         if result is not None:
             return result
@@ -612,7 +1368,18 @@ class Slist(List[A]):
         return output
 
     def distinct(self: Sequence[CanHash]) -> Slist[CanHash]:
-        """Deduplicates items. Preserves order."""
+        """Remove duplicate elements while preserving order.
+
+        Returns
+        -------
+        Slist[CanHash]
+            A new list with duplicates removed, maintaining original order
+
+        Examples
+        --------
+        >>> Slist([1, 2, 2, 3, 1, 4]).distinct()
+        Slist([1, 2, 3, 4])
+        """
         seen = set()
         output = Slist[CanHash]()
         for item in self:
@@ -624,7 +1391,24 @@ class Slist(List[A]):
         return output
 
     def distinct_by(self, key: Callable[[A], CanHash]) -> Slist[A]:
-        """Deduplicates a list by a key. Preserves order."""
+        """Remove duplicates based on a key function while preserving order.
+
+        Parameters
+        ----------
+        key : Callable[[A], CanHash]
+            Function to compute the unique key for each element
+
+        Returns
+        -------
+        Slist[A]
+            A new list with duplicates removed, maintaining original order
+
+        Examples
+        --------
+        >>> data = Slist([(1, 'a'), (2, 'b'), (1, 'c')])
+        >>> data.distinct_by(lambda x: x[0])  # Distinct by first element
+        Slist([(1, 'a'), (2, 'b')])
+        """
         seen = set()
         output = Slist[A]()
         for item in self:
@@ -637,10 +1421,35 @@ class Slist(List[A]):
         return output
 
     def distinct_item_or_raise(self, key: Callable[[A], CanHash]) -> A:
+        """Get the single unique item by a key function.
+
+        Raises ValueError if the list is empty or contains multiple distinct items.
+
+        Parameters
+        ----------
+        key : Callable[[A], CanHash]
+            Function to compute the unique key for each element
+
+        Returns
+        -------
+        A
+            The single unique item
+
+        Raises
+        ------
+        ValueError
+            If the list is empty or contains multiple distinct items
+
+        Examples
+        --------
+        >>> Slist([1, 1, 1]).distinct_item_or_raise(lambda x: x)
+        1
+        >>> try:
+        ...     Slist([1, 2, 1]).distinct_item_or_raise(lambda x: x)
+        ... except ValueError as e:
+        ...     print(str(e))
+        Slist is not distinct [1, 2, 1]
         """
-        Returns the distinct item in the list.
-        If the list is empty, raises an error
-        If the items in the list are not distinct, raises an error"""
         if not self:
             raise ValueError("Slist is empty")
         distinct = self.distinct_by(key)
@@ -649,8 +1458,31 @@ class Slist(List[A]):
         return distinct[0]
 
     def par_map(self, func: Callable[[A], B], executor: concurrent.futures.Executor) -> Slist[B]:
-        """Applies the function to each element using the specified executor. Awaits for all results.
-        If executor is ProcessPoolExecutor, make sure the function passed is pickable, e.g. no lambda functions"""
+        """Apply a function to each element in parallel using an executor.
+
+        Parameters
+        ----------
+        func : Callable[[A], B]
+            Function to apply to each element. Must be picklable if using ProcessPoolExecutor
+        executor : concurrent.futures.Executor
+            The executor to use for parallel execution
+
+        Returns
+        -------
+        Slist[B]
+            A new list with the results of applying func to each element
+
+        Examples
+        --------
+        >>> from concurrent.futures import ThreadPoolExecutor
+        >>> with ThreadPoolExecutor() as exe:
+        ...     Slist([1, 2, 3]).par_map(lambda x: x * 2, exe)
+        Slist([2, 4, 6])
+
+        Notes
+        -----
+        If using ProcessPoolExecutor, the function must be picklable (e.g., no lambda functions)
+        """
         futures: List[concurrent.futures._base.Future[B]] = [executor.submit(func, item) for item in self]
         results = []
         for fut in futures:
@@ -660,7 +1492,30 @@ class Slist(List[A]):
     async def par_map_async(
         self, func: Callable[[A], typing.Awaitable[B]], max_par: int | None = None, tqdm: bool = False
     ) -> Slist[B]:
-        """Applies the async function to each element. Awaits for all results."""
+        """Asynchronously apply a function to each element with optional parallelism limit.
+
+        Parameters
+        ----------
+        func : Callable[[A], Awaitable[B]]
+            Async function to apply to each element
+        max_par : int | None, optional
+            Maximum number of parallel operations, by default None
+        tqdm : bool, optional
+            Whether to show a progress bar, by default False
+
+        Returns
+        -------
+        Slist[B]
+            A new Slist with the transformed elements
+
+        Examples
+        --------
+        >>> async def slow_double(x):
+        ...     await asyncio.sleep(0.1)
+        ...     return x * 2
+        >>> await Slist([1, 2, 3]).par_map_async(slow_double, max_par=2)
+        Slist([2, 4, 6])
+        """
         if max_par is None:
             if tqdm:
                 import tqdm as tqdm_module
@@ -705,7 +1560,26 @@ class Slist(List[A]):
         return Slist(await asyncio.gather(*self))
 
     def filter_text_search(self, key: Callable[[A], str], search: List[str]) -> Slist[A]:
-        """Filters a list of text with text terms"""
+        """Filter items based on text search terms.
+
+        Parameters
+        ----------
+        key : Callable[[A], str]
+            Function to extract searchable text from each item
+        search : List[str]
+            List of search terms to match (case-insensitive)
+
+        Returns
+        -------
+        Slist[A]
+            Items where key text matches any search term
+
+        Examples
+        --------
+        >>> items = Slist(['apple pie', 'banana bread', 'cherry cake'])
+        >>> items.filter_text_search(lambda x: x, ['pie', 'cake'])
+        Slist(['apple pie', 'cherry cake'])
+        """
 
         def matches_search(text: str) -> bool:
             if search:
@@ -717,6 +1591,23 @@ class Slist(List[A]):
         return self.filter(predicate=lambda item: matches_search(key(item)))
 
     def mk_string(self: Sequence[str], sep: str) -> str:
+        """Join string elements with a separator.
+
+        Parameters
+        ----------
+        sep : str
+            Separator to use between elements
+
+        Returns
+        -------
+        str
+            Joined string
+
+        Examples
+        --------
+        >>> Slist(['a', 'b', 'c']).mk_string(', ')
+        'a, b, c'
+        """
         return sep.join(self)
 
     @overload
@@ -734,14 +1625,48 @@ class Slist(List[A]):
     def average(
         self: Sequence[Union[int, float, bool]],
     ) -> Optional[float]:
-        """Returns None when the list is empty"""
+        """Calculate the arithmetic mean of numeric values.
+
+        Returns
+        -------
+        Optional[float]
+            The average of all values, or None if the list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).average()
+        2.5
+        >>> Slist([]).average()
+        None
+        """
         this = typing.cast(Slist[Union[int, float, bool]], self)
         return this.sum() / this.length if this.length > 0 else None
 
     def average_or_raise(
         self: Sequence[Union[int, float, bool]],
     ) -> float:
-        """Raises when the list is empty"""
+        """Calculate the arithmetic mean of numeric values.
+
+        Returns
+        -------
+        float
+            The average of all values
+
+        Raises
+        ------
+        ValueError
+            If the list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).average_or_raise()
+        2.5
+        >>> try:
+        ...     Slist([]).average_or_raise()
+        ... except ValueError as e:
+        ...     print(str(e))
+        Cannot get average of empty list
+        """
         this = typing.cast(Slist[Union[int, float, bool]], self)
         if this.length == 0:
             raise ValueError("Cannot get average of empty list")
@@ -750,7 +1675,26 @@ class Slist(List[A]):
     def statistics_or_raise(
         self: Sequence[Union[int, float, bool]],
     ) -> AverageStats:
-        """Raises when the list is empty"""
+        """Calculate comprehensive statistics for numeric values.
+
+        Returns
+        -------
+        AverageStats
+            Statistics including mean, standard deviation, and confidence intervals
+
+        Raises
+        ------
+        ValueError
+            If the list is empty
+
+        Examples
+        --------
+        >>> stats = Slist([1, 2, 3, 4, 5]).statistics_or_raise()
+        >>> round(stats.average, 2)
+        3.0
+        >>> round(stats.standard_deviation, 2)
+        1.58
+        """
         this = typing.cast(Slist[Union[int, float, bool]], self)
         if this.length == 0:
             raise ValueError("Cannot get average of empty list")
@@ -771,20 +1715,84 @@ class Slist(List[A]):
         )
 
     def standard_deviation(self: Slist[Union[int, float]]) -> Optional[float]:
-        """Returns None when the list is empty"""
+        """Calculate the population standard deviation.
+
+        Returns
+        -------
+        Optional[float]
+            The standard deviation, or None if the list is empty
+
+        Examples
+        --------
+        >>> round(Slist([1, 2, 3, 4, 5]).standard_deviation(), 2)
+        1.58
+        >>> Slist([]).standard_deviation()
+        None
+        """
         return statistics.stdev(self) if self.length > 0 else None
 
     def standardize(self: Slist[Union[int, float]]) -> Slist[float]:
-        """standardize to mean 0, sd 1
-        Returns empty list when the list is empty"""
+        """Standardize values to have mean 0 and standard deviation 1.
+
+        Returns
+        -------
+        Slist[float]
+            Standardized values, or empty list if input is empty
+
+        Examples
+        --------
+        >>> result = Slist([1, 2, 3, 4, 5]).standardize()
+        >>> [round(x, 2) for x in result]  # Rounded for display
+        [-1.26, -0.63, 0.0, 0.63, 1.26]
+        """
         mean = self.average()
         sd = self.standard_deviation()
         return Slist((x - mean) / sd for x in self) if mean is not None and sd is not None else Slist()
 
     def fold_left(self, acc: B, func: Callable[[B, A], B]) -> B:
+        """Fold left operation (reduce) with initial accumulator.
+
+        Parameters
+        ----------
+        acc : B
+            Initial accumulator value
+        func : Callable[[B, A], B]
+            Function to combine accumulator with each element
+
+        Returns
+        -------
+        B
+            Final accumulated value
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).fold_left(0, lambda acc, x: acc + x)
+        10
+        >>> Slist(['a', 'b', 'c']).fold_left('', lambda acc, x: acc + x)
+        'abc'
+        """
         return reduce(func, self, acc)
 
     def fold_right(self, acc: B, func: Callable[[A, B], B]) -> B:
+        """Fold right operation with initial accumulator.
+
+        Parameters
+        ----------
+        acc : B
+            Initial accumulator value
+        func : Callable[[A, B], B]
+            Function to combine each element with accumulator
+
+        Returns
+        -------
+        B
+            Final accumulated value
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).fold_right('', lambda x, acc: str(x) + acc)
+        '321'
+        """
         return reduce(lambda a, b: func(b, a), reversed(self), acc)
 
     def sum_option(self: Sequence[CanAdd]) -> Optional[CanAdd]:
@@ -797,7 +1805,26 @@ class Slist(List[A]):
         return reduce(lambda a, b: a + b, self)
 
     def split_by(self, predicate: Callable[[A], bool]) -> Tuple[Slist[A], Slist[A]]:
-        """Splits the list into two lists based on the predicate"""
+        """Split list into two lists based on a predicate.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function to determine which list each element goes into
+
+        Returns
+        -------
+        Tuple[Slist[A], Slist[A]]
+            Tuple of (matching elements, non-matching elements)
+
+        Examples
+        --------
+        >>> evens, odds = Slist([1, 2, 3, 4, 5]).split_by(lambda x: x % 2 == 0)
+        >>> evens
+        Slist([2, 4])
+        >>> odds
+        Slist([1, 3, 5])
+        """
         left = Slist[A]()
         right = Slist[A]()
         for item in self:
@@ -822,7 +1849,26 @@ class Slist(List[A]):
         return output
 
     def split_proportion(self, left_proportion: float) -> Tuple[Slist[A], Slist[A]]:
-        """Splits the list into two lists based on the left_proportion. 0 < left_proportion < 1"""
+        """Split list into two parts based on a proportion.
+
+        Parameters
+        ----------
+        left_proportion : float
+            Proportion of elements to include in first list (0 < left_proportion < 1)
+
+        Returns
+        -------
+        Tuple[Slist[A], Slist[A]]
+            Tuple of (first part, second part)
+
+        Examples
+        --------
+        >>> first, second = Slist([1, 2, 3, 4, 5]).split_proportion(0.6)
+        >>> first
+        Slist([1, 2, 3])
+        >>> second
+        Slist([4, 5])
+        """
         assert 0 < left_proportion < 1, "left_proportion needs to be between 0 and 1"
         left = Slist[A]()
         right = Slist[A]()
@@ -834,7 +1880,23 @@ class Slist(List[A]):
         return left, right
 
     def split_into_n(self, n: int) -> Slist[Slist[A]]:
-        """Splits the list into n lists of roughly equal size"""
+        """Split list into n roughly equal parts.
+
+        Parameters
+        ----------
+        n : int
+            Number of parts to split into (must be positive)
+
+        Returns
+        -------
+        Slist[Slist[A]]
+            List of n sublists of roughly equal size
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4, 5]).split_into_n(2)
+        Slist([Slist([1, 3, 5]), Slist([2, 4])])
+        """
         assert n > 0, "n needs to be greater than 0"
         output: Slist[Slist[A]] = Slist()
         for _ in range(n):
@@ -844,21 +1906,42 @@ class Slist(List[A]):
         return output
 
     def copy(self) -> Slist[A]:
+        """Create a shallow copy of the list.
+
+        Returns
+        -------
+        Slist[A]
+            A new Slist with the same elements
+
+        Examples
+        --------
+        >>> original = Slist([1, 2, 3])
+        >>> copied = original.copy()
+        >>> copied.append(4)
+        >>> original  # Original is unchanged
+        Slist([1, 2, 3])
+        """
         return Slist(super().copy())
 
     def repeat_until_size(self, size: int) -> Optional[Slist[A]]:
-        """
-        Repeats the list until it reaches the specified size
-        >>> Slist(1, 2, 3).repeat_until_size(5)
-        Slist(1, 2, 3, 1, 2)
+        """Repeat the list elements until reaching specified size.
 
-        Returns None if the list is empty
-        >>> Slist().repeat_until_size(5)
+        Parameters
+        ----------
+        size : int
+            Target size (must be positive)
+
+        Returns
+        -------
+        Optional[Slist[A]]
+            New list with repeated elements, or None if input is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2]).repeat_until_size(5)
+        Slist([1, 2, 1, 2, 1])
+        >>> Slist([]).repeat_until_size(3)
         None
-
-        Returns a truncated list if the list is longer than the specified size
-        >>> Slist(1, 2, 3).repeat_until_size(2)
-        Slist(1, 2)
         """
         assert size > 0, "size needs to be greater than 0"
         if self.is_empty:
@@ -873,16 +1956,29 @@ class Slist(List[A]):
                         new.append(item)
 
     def repeat_until_size_or_raise(self, size: int) -> Slist[A]:
-        """
-        Repeats the list until it reaches the specified size
-        >>> Slist(1, 2, 3).repeat_until_size_or_raise(5)
-        Slist(1, 2, 3, 1, 2)
+        """Repeat the list elements until reaching specified size.
 
-        Returns a truncated list if the list is longer than the specified size
-        >>> Slist(1, 2, 3).repeat_until_size_or_raise(2)
-        Slist(1, 2)
+        Parameters
+        ----------
+        size : int
+            Target size (must be positive)
 
-        Throws an exception if the list is empty
+        Returns
+        -------
+        Slist[A]
+            New list with repeated elements
+
+        Raises
+        ------
+        AssertionError
+            If size is not positive
+        ValueError
+            If input list is empty
+
+        Examples
+        --------
+        >>> Slist([1, 2]).repeat_until_size_or_raise(5)
+        Slist([1, 2, 1, 2, 1])
         """
         assert size > 0, "size needs to be greater than 0"
         assert not self.is_empty, "input needs to be non empty"

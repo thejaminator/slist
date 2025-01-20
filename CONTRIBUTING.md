@@ -122,3 +122,74 @@ $ git push --tags
 ```
 
 GitHub Actions will then deploy to PyPI if tests pass.
+
+## Documentation Guidelines
+
+### Docstring Format
+All new code should include docstrings following the reST/NumPy format:
+
+```python
+def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
+    """Short description of what the method does.
+
+    Parameters
+    ----------
+    param1 : Type1
+        Description of param1
+    param2 : Type2
+        Description of param2
+
+    Returns
+    -------
+    ReturnType
+        Description of return value
+
+    Examples
+    --------
+    >>> Slist([1, 2, 3]).method_name(param1, param2)
+    Expected output
+    """
+```
+
+### Documentation Requirements
+
+1. All public methods must have docstrings
+2. Include type information in Parameters and Returns sections
+3. Provide at least one working example
+4. Use backticks (`` ` ``) for inline code references
+5. Keep examples simple and focused on one use case
+6. Include edge cases in examples where relevant
+
+### Building Documentation
+
+1. Install documentation dependencies:
+```bash
+poetry install -E doc
+```
+
+2. Preview documentation locally:
+```bash
+mkdocs serve
+```
+
+3. Build documentation:
+```bash
+mkdocs build
+```
+
+The documentation will automatically be built and deployed when changes are merged to main.
+
+### Documentation Structure
+
+- `docs/index.md`: Main landing page and quick start
+- `docs/api/`: API reference documentation
+- `docs/contributing.md`: Contribution guidelines (this file)
+
+### Tips for Good Documentation
+
+1. Write clear, concise descriptions
+2. Include both basic and advanced examples
+3. Document exceptions and edge cases
+4. Keep examples runnable and tested
+5. Update docs when changing method signatures
+6. Use proper formatting for code blocks and inline code
