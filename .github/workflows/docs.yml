@@ -4,6 +4,11 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+      - 'slist/**'
 permissions:
   contents: write
 jobs:
@@ -25,4 +30,9 @@ jobs:
       - run: poetry install -E doc
       - run: pip install mkdocs-material mkdocs mkdocstrings[python]
       - run: pip install -e .
-      - run: poetry run mkdocs gh-deploy --force 
+      - name: Build and Deploy Documentation
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          poetry run mkdocs build --verbose
+          poetry run mkdocs gh-deploy --force --verbose 
