@@ -45,21 +45,23 @@ plugins:
             members_order: source
             show_if_no_docstring: true
             separate_signature: true
-            docstring_section_style: list
+            docstring_section_style: table
             show_root_toc_entry: true
             show_root_members_full_path: false
             docstring_options:
               ignore_init_summary: true
-            docstring_section_style: table
+              # hide_parameters: true
+              # hide_returns: true
+              # hide_examples: true
             members_order: source
             show_signature_annotations: true
             signature_crossrefs: true
             filters: ["!^_"]
             docstring_style: google
-            docstring_section_style: spacy
             show_docstring_attributes: true
             show_docstring_examples: false
             show_docstring_returns: false
+            show_docstring_parameters: false
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -73,6 +75,8 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+      toc_depth: 4
+      baselevel: 1
 
 nav:
   - Home: index.md
