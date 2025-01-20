@@ -11,9 +11,6 @@ Not able to convince your colleagues to use immutable functional data structures
 This library lets you still have the benefits of typesafe chaining methods while letting your colleagues have their mutable lists!
 
 
-
-
-
 [![pypi](https://img.shields.io/pypi/v/slist.svg)](https://pypi.org/project/slist)
 [![python](https://img.shields.io/pypi/pyversions/slist.svg)](https://pypi.org/project/slist)
 [![Build Status](https://github.com/thejaminator/slist/actions/workflows/dev.yml/badge.svg)](https://github.com/thejaminator/slist/actions/workflows/dev.yml)
@@ -23,7 +20,7 @@ pip install slist
 ```
 
 
-* GitHub: <https://github.com/thejaminator/slist>
+* Documentation: <https://thejaminator.github.io/slist/>
 
 
 ## Quick Start
