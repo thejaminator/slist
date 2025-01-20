@@ -39,7 +39,10 @@ E = TypeVar("E")
 CanCompare = TypeVar("CanCompare", bound="Comparable")
 CanHash = TypeVar("CanHash", bound=Hashable)
 
-identity = lambda x: x
+
+def identity(x: A) -> A:
+    return x
+
 
 A_co = TypeVar("A_co", covariant=True)
 B_co = TypeVar("B_co", covariant=True)
@@ -59,8 +62,7 @@ class Group(NamedTuple, Generic[A_co, B_co]):
 
 
 class Addable(Protocol):
-    def __add__(self: A, other: A, /) -> A:
-        ...
+    def __add__(self: A, other: A, /) -> A: ...
 
 
 CanAdd = TypeVar("CanAdd", bound=Addable)
@@ -79,17 +81,13 @@ class AverageStats:
 
 
 class Comparable(Protocol):
-    def __lt__(self: CanCompare, other: CanCompare, /) -> bool:
-        ...
+    def __lt__(self: CanCompare, other: CanCompare, /) -> bool: ...
 
-    def __gt__(self: CanCompare, other: CanCompare, /) -> bool:
-        ...
+    def __gt__(self: CanCompare, other: CanCompare, /) -> bool: ...
 
-    def __le__(self: CanCompare, other: CanCompare, /) -> bool:
-        ...
+    def __le__(self: CanCompare, other: CanCompare, /) -> bool: ...
 
-    def __ge__(self: CanCompare, other: CanCompare, /) -> bool:
-        ...
+    def __ge__(self: CanCompare, other: CanCompare, /) -> bool: ...
 
 
 class Slist(List[A]):
@@ -227,12 +225,10 @@ class Slist(List[A]):
         return Slist(Group(key=key, values=value) for key, value in d.items())
 
     @overload
-    def ungroup(self: Slist[Group[Any, Slist[C]]]) -> Slist[C]:
-        ...
+    def ungroup(self: Slist[Group[Any, Slist[C]]]) -> Slist[C]: ...
 
     @overload
-    def ungroup(self: Slist[Group[Any, Sequence[C]]]) -> Slist[C]:
-        ...
+    def ungroup(self: Slist[Group[Any, Sequence[C]]]) -> Slist[C]: ...
 
     def ungroup(self: Slist[Group[Any, Slist[C]]] | Slist[Group[Any, Sequence[C]]]) -> Slist[C]:
         """Ungroups the list of groups"""
@@ -390,20 +386,16 @@ class Slist(List[A]):
         __third: Sequence[C],
         __fourth: Sequence[D],
         __fifth: Sequence[E],
-    ) -> Slist[Tuple[A, B, C, D, E]]:
-        ...
+    ) -> Slist[Tuple[A, B, C, D, E]]: ...
 
     @overload
-    def zip(self, __second: Sequence[B], __third: Sequence[C], __fourth: Sequence[D]) -> Slist[Tuple[A, B, C, D]]:
-        ...
+    def zip(self, __second: Sequence[B], __third: Sequence[C], __fourth: Sequence[D]) -> Slist[Tuple[A, B, C, D]]: ...
 
     @overload
-    def zip(self, __second: Sequence[B], __third: Sequence[C]) -> Slist[Tuple[A, B, C]]:
-        ...
+    def zip(self, __second: Sequence[B], __third: Sequence[C]) -> Slist[Tuple[A, B, C]]: ...
 
     @overload
-    def zip(self, __second: Sequence[B]) -> Slist[Tuple[A, B]]:
-        ...
+    def zip(self, __second: Sequence[B]) -> Slist[Tuple[A, B]]: ...
 
     def zip(self, *args: Sequence[Any]) -> Slist[Any]:
         """Zips the list with the given sequences"""
@@ -734,12 +726,10 @@ class Slist(List[A]):
         return sep.join(self)
 
     @overload
-    def sum(self: Sequence[int]) -> int:
-        ...
+    def sum(self: Sequence[int]) -> int: ...
 
     @overload
-    def sum(self: Sequence[float]) -> float:
-        ...
+    def sum(self: Sequence[float]) -> float: ...
 
     def sum(
         self: Sequence[Union[int, float, bool]],

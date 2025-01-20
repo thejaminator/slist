@@ -34,13 +34,19 @@ def test_split_by():
         Slist([2, 4]),
         Slist([1, 3, 5]),
     ), "should split a non-empty Slist correctly into two Slists"
-    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: True) == (
-        Slist([1, 2, 3, 4, 5]),
-        Slist([]),
+    assert (
+        Slist([1, 2, 3, 4, 5]).split_by(lambda x: True)
+        == (
+            Slist([1, 2, 3, 4, 5]),
+            Slist([]),
+        )
     ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
-    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: False) == (
-        Slist([]),
-        Slist([1, 2, 3, 4, 5]),
+    assert (
+        Slist([1, 2, 3, 4, 5]).split_by(lambda x: False)
+        == (
+            Slist([]),
+            Slist([1, 2, 3, 4, 5]),
+        )
     ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
 
 
