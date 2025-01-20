@@ -1,4 +1,5 @@
 import pytest
+from pytest import CaptureFixture
 
 from slist import Slist, identity
 import numpy as np
@@ -325,3 +326,91 @@ def test_statistics_or_raise():
     empty = Slist([])
     with pytest.raises(ValueError):
         empty.statistics_or_raise()
+
+
+def test_one():
+    assert Slist.one(1) == Slist([1])
+    assert Slist.one("test") == Slist(["test"])
+    assert Slist.one([1, 2]) == Slist([[1, 2]])
+
+
+def test_one_option():
+    assert Slist.one_option(1) == Slist([1])
+    assert Slist.one_option(None) == Slist()
+    assert Slist.one_option("test") == Slist(["test"])
+
+
+def test_any():
+    numbers = Slist([1, 2, 3, 4, 5])
+    assert numbers.any(lambda x: x > 3) is True
+    assert numbers.any(lambda x: x > 5) is False
+    assert Slist([]).any(lambda x: True) is False
+
+
+def test_all():
+    numbers = Slist([1, 2, 3, 4, 5])
+    assert numbers.all(lambda x: x > 0) is True
+    assert numbers.all(lambda x: x > 3) is False
+    assert Slist([]).all(lambda x: False) is True
+
+
+def test_max_by_ordering():
+    numbers = Slist([1, 2, 3, 4, 5])
+    # Find maximum by comparing if first number is less than second
+    assert numbers.max_by_ordering(lambda x, y: x < y) == 5
+    # Find maximum by comparing if first number is greater than second (will give minimum)
+    assert numbers.max_by_ordering(lambda x, y: x > y) == 1
+    assert Slist([]).max_by_ordering(lambda x, y: x < y) is None
+
+
+def test_slice_with_bool():
+    numbers = Slist([1, 2, 3, 4, 5])
+    bools = [True, False, True, False, True]
+    assert numbers.slice_with_bool(bools) == Slist([1, 3, 5])
+    assert numbers.slice_with_bool([False, False, False, False, False]) == Slist([])
+    assert numbers.slice_with_bool([True, True, True, True, True]) == numbers
+
+
+def test_find_one_or_raise():
+    numbers = Slist([1, 2, 3, 4, 5])
+    assert numbers.find_one_or_raise(lambda x: x > 3) == 4
+    assert numbers.find_one_or_raise(lambda x: x == 1) == 1
+    with pytest.raises(RuntimeError, match="Failed to find predicate"):
+        numbers.find_one_or_raise(lambda x: x > 10)
+    with pytest.raises(ValueError, match="Custom error"):
+        numbers.find_one_or_raise(lambda x: x > 10, ValueError("Custom error"))
+
+
+def test_pairwise():
+    numbers = Slist([1, 2, 3, 4, 5])
+    assert numbers.pairwise() == Slist([(1, 2), (2, 3), (3, 4), (4, 5)])
+    assert Slist([1]).pairwise() == Slist([])
+    assert Slist([]).pairwise() == Slist([])
+
+
+def test_print_length(capsys: CaptureFixture[str]):
+    numbers = Slist([1, 2, 3, 4, 5])
+    result = numbers.print_length()
+    captured = capsys.readouterr()
+    assert captured.out == "Slist Length: 5\n"
+    assert result == numbers  # Should return the original list
+
+    # Test with custom prefix
+    result = numbers.print_length(prefix="Length: ")
+    captured = capsys.readouterr()
+    assert captured.out == "Length: 5\n"
+
+    # Test with custom printer
+    output = []
+    numbers.print_length(printer=output.append)
+    assert output == ["Slist Length: 5"]
+
+
+def test_empty_properties():
+    empty_list = Slist([])
+    assert empty_list.is_empty is True
+    assert empty_list.not_empty is False
+
+    non_empty_list = Slist([1, 2, 3])
+    assert non_empty_list.is_empty is False
+    assert non_empty_list.not_empty is True
