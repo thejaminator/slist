@@ -637,6 +637,62 @@ class Slist(List[A]):
         """
         return self.map(lambda group: group.map_values(lambda values: Slist(values).map(func)))
 
+    def value_counts(self, key: Callable[[A], CanHash], sort: bool = True) -> Slist[Group[CanHash, int]]:
+        """Count occurrences of each unique value or key-derived value.
+
+        Parameters
+        ----------
+        key : Callable[[A], CanHash]
+            Function to extract the value to count by
+        sort : bool, default=True
+            If True, sorts the results by count in descending order
+
+        Returns
+        -------
+        Slist[Group[CanHash, int]]
+            A list of groups with keys and their counts
+
+        Examples
+        --------
+        >>> Slist(['apple', 'banana', 'cherry']).value_counts(key=lambda x: x)
+        Slist([Group(key='apple', values=1), Group(key='banana', values=1), Group(key='cherry', values=1)])
+        """
+        result = self.group_by(key).map_on_group_values(len)
+        if sort:
+            return result.sort_by(key=lambda group: group.values, reverse=True)
+        return result
+
+    def value_percentage(self, key: Callable[[A], CanHash], sort: bool = True) -> Slist[Group[CanHash, float]]:
+        """Count occurrences of each unique value or key-derived value.
+
+        Parameters
+        ----------
+        key : Callable[[A], CanHash]
+            Function to extract the value to count by
+        sort : bool, default=True
+            If True, sorts the results by percentage in descending order
+
+        Returns
+        -------
+        Slist[Group[CanHash, float]]
+            A list of groups with keys and their percentage of total
+
+        Examples
+        --------
+        >>> Slist(['a', 'a', 'b']).value_percentage(key=lambda x: x)
+        Slist([Group(key='a', values=0.6666666666666666), Group(key='b', values=0.3333333333333333)])
+        """
+        total = len(self)
+        if total == 0:
+            return Slist()
+
+        counts = self.value_counts(key, sort=False)
+        result = counts.map(lambda group: Group(key=group.key, values=group.values / total))  # type: ignore
+
+        if sort:
+            return result.sort_by(key=lambda group: group.values, reverse=True)
+        return result
+
     def to_dict(self: Sequence[Tuple[CanHash, B]]) -> typing.Dict[CanHash, B]:
         """
         Transforms a Slist of key value pairs to a dictionary

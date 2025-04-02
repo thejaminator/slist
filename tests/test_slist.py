@@ -1,7 +1,7 @@
 import pytest
 from pytest import CaptureFixture
 
-from slist import Slist, identity
+from slist import Slist, identity, Group
 import numpy as np
 
 
@@ -414,3 +414,107 @@ def test_empty_properties():
     non_empty_list = Slist([1, 2, 3])
     assert non_empty_list.is_empty is False
     assert non_empty_list.not_empty is True
+
+
+def test_value_counts():
+    # Test with strings
+    data = Slist(["apple", "banana", "apple", "cherry", "banana", "apple"])
+    result = data.value_counts(key=lambda x: x)
+    assert result == Slist([Group(key="apple", values=3), Group(key="banana", values=2), Group(key="cherry", values=1)])
+
+    # Test with sort=False should preserve input order
+    data = Slist(["cherry", "banana", "apple", "banana", "apple", "apple"])
+    result = data.value_counts(key=lambda x: x, sort=False)
+    assert result == Slist([Group(key="cherry", values=1), Group(key="banana", values=2), Group(key="apple", values=3)])
+
+    # Test with numbers
+    numbers = Slist([1, 2, 2, 3, 3, 3, 4, 4, 4, 4])
+    result = numbers.value_counts(key=lambda x: x)
+    assert result == Slist(
+        [Group(key=4, values=4), Group(key=3, values=3), Group(key=2, values=2), Group(key=1, values=1)]
+    )
+
+    # Test with custom key function
+    data = Slist(["apple", "banana", "cherry", "date", "elderberry"])
+    result = data.value_counts(key=lambda x: len(x))
+    assert result == Slist(
+        [Group(key=6, values=2), Group(key=5, values=1), Group(key=4, values=1), Group(key=10, values=1)]
+    )
+
+    # Test with empty list
+    empty = Slist([])
+    result = empty.value_counts(key=lambda x: x)
+    assert result == Slist([])
+
+
+def test_value_percentage():
+    # Test with strings
+    data = Slist(["apple", "banana", "apple", "cherry", "banana", "apple"])
+    result = data.value_percentage(key=lambda x: x)
+
+    assert len(result) == 3
+    assert result[0].key == "apple"
+    assert result[1].key == "banana"
+    assert result[2].key == "cherry"
+    assert pytest.approx(result[0].values) == 0.5  # 3/6
+    assert pytest.approx(result[1].values) == 1 / 3  # 2/6
+    assert pytest.approx(result[2].values) == 1 / 6  # 1/6
+
+    # Test with sort=False should preserve input order
+    data = Slist(["cherry", "banana", "apple", "banana", "apple", "apple"])
+    result = data.value_percentage(key=lambda x: x, sort=False)
+
+    assert len(result) == 3
+    assert result[0].key == "cherry"
+    assert result[1].key == "banana"
+    assert result[2].key == "apple"
+    assert pytest.approx(result[0].values) == 1 / 6  # 1/6
+    assert pytest.approx(result[1].values) == 1 / 3  # 2/6
+    assert pytest.approx(result[2].values) == 0.5  # 3/6
+
+    # Test with numbers
+    numbers = Slist([1, 2, 2, 3, 3, 3, 4, 4, 4, 4])
+    result = numbers.value_percentage(key=lambda x: x)
+
+    assert len(result) == 4
+    assert result[0].key == 4
+    assert result[1].key == 3
+    assert result[2].key == 2
+    assert result[3].key == 1
+    assert pytest.approx(result[0].values) == 0.4  # 4/10
+    assert pytest.approx(result[1].values) == 0.3  # 3/10
+    assert pytest.approx(result[2].values) == 0.2  # 2/10
+    assert pytest.approx(result[3].values) == 0.1  # 1/10
+
+    # Test with custom key function
+    data = Slist(["apple", "banana", "cherry", "date", "elderberry"])
+    result = data.value_percentage(key=lambda x: len(x))
+
+    assert len(result) == 4
+    assert "date" in data  # 4 chars
+    assert "apple" in data  # 5 chars
+    assert "banana" in data and "cherry" in data  # 6 chars
+    assert "elderberry" in data  # 10 chars
+
+    # Verify all keys are present
+    keys = [group.key for group in result]
+    assert 4 in keys
+    assert 5 in keys
+    assert 6 in keys
+    assert 10 in keys
+
+    # Verify values add up to 1.0
+    total = sum(group.values for group in result)
+    assert pytest.approx(total) == 1.0
+
+    # Verify each value is 0.2 (1/5) except for length 6 which should be 0.4 (2/5)
+    for group in result:
+        if group.key == 6:
+            assert pytest.approx(group.values) == 0.4  # 2/5
+        else:
+            assert pytest.approx(group.values) == 0.2  # 1/5
+
+    # Test with empty list
+    empty = Slist([])
+    result = empty.value_percentage(key=lambda x: x)
+    assert result == Slist([])
