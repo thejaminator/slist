@@ -3,9 +3,11 @@ from __future__ import annotations
 import asyncio
 import concurrent.futures
 from dataclasses import dataclass
+import itertools
 import random
 import re
 import statistics
+import sys
 import typing
 from collections import OrderedDict
 
@@ -35,6 +37,7 @@ B = TypeVar("B")
 C = TypeVar("C")
 D = TypeVar("D")
 E = TypeVar("E")
+F = TypeVar("F")
 
 CanCompare = TypeVar("CanCompare", bound="Comparable")
 CanHash = TypeVar("CanHash", bound=Hashable)
@@ -228,17 +231,44 @@ class Slist(List[A]):
         """
         return Slist(func(item) for item in self)
 
-    def product(self: Sequence[A], other: Sequence[B]) -> Slist[Tuple[A, B]]:
-        """Compute the cartesian product with another sequence.
+    @overload
+    def product(self: Sequence[A], other: Sequence[B], /) -> Slist[Tuple[A, B]]: ...
+
+    @overload
+    def product(self: Sequence[A], other: Sequence[B], other1: Sequence[C], /) -> Slist[Tuple[A, B, C]]: ...
+
+    @overload
+    def product(
+        self: Sequence[A], other: Sequence[B], other1: Sequence[C], other2: Sequence[D], /
+    ) -> Slist[Tuple[A, B, C, D]]: ...
+
+    @overload
+    def product(
+        self: Sequence[A], other: Sequence[B], other1: Sequence[C], other2: Sequence[D], other3: Sequence[E], /
+    ) -> Slist[Tuple[A, B, C, D, E]]: ...
+
+    @overload
+    def product(
+        self: Sequence[A],
+        other: Sequence[B],
+        other1: Sequence[C],
+        other2: Sequence[D],
+        other3: Sequence[E],
+        other4: Sequence[F],
+        /,
+    ) -> Slist[Tuple[A, B, C, D, E, F]]: ...
+
+    def product(self: Sequence[A], *others: Sequence[Any]) -> Slist[Tuple[Any, ...]]:
+        """Compute the cartesian product with other sequences.
 
         Parameters
         ----------
-        other : Sequence[B]
-            The sequence to compute the product with
+        *others : Sequence[Any]
+            The sequences to compute the product with
 
         Returns
         -------
-        Slist[Tuple[A, B]]
+        Slist[Tuple[Any, ...]]
             A new Slist containing tuples of all combinations
 
         Examples
@@ -246,7 +276,7 @@ class Slist(List[A]):
         >>> Slist([1, 2]).product(['a', 'b'])
         Slist([(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')])
         """
-        return Slist((a, b) for a in self for b in other)
+        return Slist(itertools.product(self, *others))
 
     def map_2(self: Sequence[Tuple[B, C]], func: Callable[[B, C], D]) -> Slist[D]:
         """Map a function over a sequence of 2-tuples.
@@ -2102,6 +2132,71 @@ class Slist(List[A]):
                 else:
                     new.append(item)
 
+    @overload
+    def zip(self, other: Sequence[B], /) -> Slist[Tuple[A, B]]: ...
+
+    @overload
+    def zip(self, other1: Sequence[B], other2: Sequence[C], /) -> Slist[Tuple[A, B, C]]: ...
+
+    @overload
+    def zip(self, other1: Sequence[B], other2: Sequence[C], other3: Sequence[D], /) -> Slist[Tuple[A, B, C, D]]: ...
+
+    @overload
+    def zip(
+        self, other1: Sequence[B], other2: Sequence[C], other3: Sequence[D], other4: Sequence[E], /
+    ) -> Slist[Tuple[A, B, C, D, E]]: ...
+
+    def zip(self: Sequence[A], *others: Sequence[Any]) -> Slist[Tuple[Any, ...]]:
+        """Zip this list with other sequences.
+
+        Parameters
+        ----------
+        *others : Sequence[B]
+            Other sequences to zip with
+
+        Returns
+        -------
+        Slist[Tuple[A, *Tuple[B, ...]]]
+            List of tuples containing elements from all sequences
+
+        Raises
+        ------
+        TypeError
+            If sequences have different lengths
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).zip(Slist(["1", "2", "3"]))
+        Slist([(1, "1"), (2, "2"), (3, "3")])
+        >>> Slist([1, 2, 3]).zip(Slist(["1", "2", "3"]), Slist([True, True, True]))
+        Slist([(1, "1", True), (2, "2", True), (3, "3", True)])
+        """
+        # Convert to list to check lengths
+        if sys.version_info >= (3, 10):
+            return Slist(zip(self, *others, strict=True))
+        else:
+            return Slist(zip(self, *others))
+
+    def slice_with_bool(self, bools: Sequence[bool]) -> Slist[A]:
+        """Slice the list using a sequence of boolean values.
+
+        Parameters
+        ----------
+        bools : Sequence[bool]
+            Boolean sequence indicating which elements to keep
+
+        Returns
+        -------
+        Slist[A]
+            List containing elements where corresponding boolean is True
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4, 5]).slice_with_bool([True, False, True, False, True])
+        Slist([1, 3, 5])
+        """
+        return Slist(item for item, keep in zip(self, bools) if keep)
+
     def __mul__(self, other: typing.SupportsIndex) -> Slist[A]:
         return Slist(super().__mul__(other))
 
@@ -2111,3 +2206,43 @@ class Slist(List[A]):
         from pydantic_core import core_schema  # type: ignore
 
         return core_schema.no_info_after_validator_function(cls, handler(list))
+
+    def find_one_or_raise(
+        self,
+        predicate: Callable[[A], bool],
+        exception: Exception = RuntimeError("Failed to find predicate"),
+    ) -> A:
+        """Find first element that satisfies a predicate or raise exception.
+
+        Parameters
+        ----------
+        predicate : Callable[[A], bool]
+            Function that returns True for the desired element
+        exception : Exception, optional
+            Exception to raise if no match found, by default RuntimeError("Failed to find predicate")
+
+        Returns
+        -------
+        A
+            First matching element
+
+        Raises
+        ------
+        Exception
+            If no matching element is found
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3, 4]).find_one_or_raise(lambda x: x > 3)
+        4
+        >>> try:
+        ...     Slist([1, 2, 3]).find_one_or_raise(lambda x: x > 5)
+        ... except RuntimeError as e:
+        ...     print(str(e))
+        Failed to find predicate
+        """
+        result = self.find_one(predicate)
+        if result is not None:
+            return result
+        else:
+            raise exception

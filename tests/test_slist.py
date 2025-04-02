@@ -82,9 +82,9 @@ def test_zip():
         [(1, "1", True), (2, "2", True), (3, "3", True)]
     )
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         Slist([1, 2, 3]).zip(Slist(["1"]))
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         Slist([1, 2, 3]).zip(Slist(["1", "2", "3"]), Slist(["1"]))
 
 
