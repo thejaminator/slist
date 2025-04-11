@@ -26,6 +26,21 @@ def test_repeat_until_size():
     assert Slist([1, 2, 3, 4, 5, 6]).repeat_until_size(5) == Slist([1, 2, 3, 4, 5]), "should be truncated"
 
 
+def test_repeat_until_size_enumerate():
+    with pytest.raises(ValueError):
+        Slist([]).repeat_until_size_enumerate(5)  # Empty list should raise ValueError
+
+    result = Slist([1, 2, 3]).repeat_until_size_enumerate(5)
+    assert result == Slist([(0, 1), (0, 2), (0, 3), (1, 1), (1, 2)]), "should repeat with repetition count"
+
+    result = Slist(["a"]).repeat_until_size_enumerate(3)
+    assert result == Slist([(0, "a"), (1, "a"), (2, "a")]), "single element repeated with increasing count"
+
+    # Test with exact size match
+    result = Slist([1, 2]).repeat_until_size_enumerate(4)
+    assert result == Slist([(0, 1), (0, 2), (1, 1), (1, 2)]), "should have exact number of elements"
+
+
 def test_split_by():
     assert Slist([]).split_by(lambda x: x % 2 == 0) == (
         Slist([]),

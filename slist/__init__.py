@@ -2153,6 +2153,46 @@ class Slist(List[A]):
                     else:
                         new.append(item)
 
+    def repeat_until_size_enumerate(self, size: int) -> Slist[Tuple[int, A]]:
+        """Repeat the list elements until reaching specified size, with enumeration.
+
+        Parameters
+        ----------
+        size : int
+            Target size (must be positive)
+
+        Returns
+        -------
+        Slist[Tuple[int, A]]
+            New list with repeated elements and their repetition count
+
+        Raises
+        ------
+        AssertionError
+            If size is not positive
+        ValueError
+            If input list is empty
+
+        Examples
+        --------
+        >>> Slist(["a", "b"]).repeat_until_size_enumerate(5)
+        Slist([(0, 'a'), (0, 'b'), (1, 'a'), (1, 'b'), (2, 'a')])
+        """
+        assert size > 0, "size needs to be greater than 0"
+        if self.is_empty:
+            raise ValueError("input needs to be non empty")
+
+        new = Slist[Tuple[int, A]]()
+        repetition_count = 0
+
+        while True:
+            for item in self:
+                if len(new) >= size:
+                    return new
+                else:
+                    new.append((repetition_count, item))
+            repetition_count += 1
+
     def repeat_until_size_or_raise(self, size: int) -> Slist[A]:
         """Repeat the list elements until reaching specified size.
 
