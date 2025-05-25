@@ -2342,3 +2342,54 @@ class Slist(List[A]):
             return result
         else:
             raise exception
+
+    def permutations_pairs(self) -> Slist[Tuple[A, A]]:
+        """Generate all possible pairs of elements, including reversed pairs.
+        
+        This method uses itertools.permutations with length=2,
+        but filters out pairs where both elements are the same.
+
+        Returns
+        -------
+        Slist[Tuple[A, A]]
+            A new Slist containing all pairs of elements
+
+        Examples
+        --------
+        >>> Slist([1, 2]).permutations_pairs()
+        Slist([(1, 2), (2, 1)])
+        >>> Slist([1, 2, 3]).permutations_pairs()
+        Slist([(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)])
+        >>> Slist([]).permutations_pairs()
+        Slist([])
+        >>> Slist([1]).permutations_pairs()
+        Slist([])
+        """
+        import itertools
+        result = Slist(perm for perm in itertools.permutations(self, 2))
+        return result
+
+    def combinations_pairs(self) -> Slist[Tuple[A, A]]:
+        """Generate pairs of elements without including reversed pairs.
+        
+        This method uses itertools.combinations with length=2.
+
+        Returns
+        -------
+        Slist[Tuple[A, A]]
+            A new Slist containing unique pairs of elements
+
+        Examples
+        --------
+        >>> Slist([1, 2]).combinations_pairs()
+        Slist([(1, 2)])
+        >>> Slist([1, 2, 3]).combinations_pairs()
+        Slist([(1, 2), (1, 3), (2, 3)])
+        >>> Slist([]).combinations_pairs()
+        Slist([])
+        >>> Slist([1]).combinations_pairs()
+        Slist([])
+        """
+        import itertools
+        result = Slist(itertools.combinations(self, 2))
+        return result

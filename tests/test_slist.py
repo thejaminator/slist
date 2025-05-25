@@ -533,3 +533,43 @@ def test_value_percentage():
     empty = Slist([])
     result = empty.value_percentage(key=lambda x: x)
     assert result == Slist([])
+
+
+def test_permutations_pairs():
+    # Test with a list of integers
+    s = Slist([1, 2, 3])
+    result = s.permutations_pairs()
+    expected = [(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)]
+    assert sorted(result) == sorted(expected)
+    
+    # Test with empty list
+    assert Slist([]).permutations_pairs() == []
+    
+    # Test with single item
+    assert Slist([1]).permutations_pairs() == []
+    
+    # Test with duplicates
+    s = Slist([1, 1, 2])
+    result = s.permutations_pairs()
+    expected = [(1, 1), (1, 2), (1, 1), (1, 2), (2, 1), (2, 1)]
+    assert sorted(result) == sorted(expected)
+
+
+def test_combinations_pairs():
+    # Test with a list of integers
+    s = Slist([1, 2, 3])
+    result = s.combinations_pairs()
+    expected = [(1, 2), (1, 3), (2, 3)]
+    assert sorted(result) == sorted(expected)
+    
+    # Test with empty list
+    assert Slist([]).combinations_pairs() == []
+    
+    # Test with single item
+    assert Slist([1]).combinations_pairs() == []
+    
+    # Test with duplicates
+    s = Slist([1, 1, 2])
+    result = s.combinations_pairs()
+    expected = [(1, 1), (1, 2), (1, 2)]
+    assert sorted(result) == sorted(expected)
