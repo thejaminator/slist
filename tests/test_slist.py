@@ -50,20 +50,18 @@ def test_split_by():
         Slist([2, 4]),
         Slist([1, 3, 5]),
     ), "should split a non-empty Slist correctly into two Slists"
-    assert (
-        Slist([1, 2, 3, 4, 5]).split_by(lambda x: True)
-        == (
-            Slist([1, 2, 3, 4, 5]),
-            Slist([]),
-        )
-    ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
-    assert (
-        Slist([1, 2, 3, 4, 5]).split_by(lambda x: False)
-        == (
-            Slist([]),
-            Slist([1, 2, 3, 4, 5]),
-        )
-    ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
+    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: True) == (
+        Slist([1, 2, 3, 4, 5]),
+        Slist([]),
+    ), (
+        "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
+    )
+    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: False) == (
+        Slist([]),
+        Slist([1, 2, 3, 4, 5]),
+    ), (
+        "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
+    )
 
 
 def test_split_on():
@@ -541,13 +539,13 @@ def test_permutations_pairs():
     result = s.permutations_pairs()
     expected = [(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)]
     assert sorted(result) == sorted(expected)
-    
+
     # Test with empty list
     assert Slist([]).permutations_pairs() == []
-    
+
     # Test with single item
     assert Slist([1]).permutations_pairs() == []
-    
+
     # Test with duplicates
     s = Slist([1, 1, 2])
     result = s.permutations_pairs()
@@ -561,13 +559,13 @@ def test_combinations_pairs():
     result = s.combinations_pairs()
     expected = [(1, 2), (1, 3), (2, 3)]
     assert sorted(result) == sorted(expected)
-    
+
     # Test with empty list
     assert Slist([]).combinations_pairs() == []
-    
+
     # Test with single item
     assert Slist([1]).combinations_pairs() == []
-    
+
     # Test with duplicates
     s = Slist([1, 1, 2])
     result = s.combinations_pairs()

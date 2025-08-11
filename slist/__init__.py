@@ -1693,8 +1693,7 @@ class Slist(List[A]):
                     async with sema:
                         return await func(item)
 
-            result = await self.par_map_async(func_with_semaphore)
-            return result
+            return Slist(await asyncio.gather(*[func_with_semaphore(item) for item in self]))
 
     async def gather(self: Sequence[typing.Awaitable[B]]) -> Slist[B]:
         """Gather and await all awaitables in the sequence.
@@ -2345,7 +2344,7 @@ class Slist(List[A]):
 
     def permutations_pairs(self) -> Slist[Tuple[A, A]]:
         """Generate all possible pairs of elements, including reversed pairs.
-        
+
         This method uses itertools.permutations with length=2,
         but filters out pairs where both elements are the same.
 
@@ -2365,13 +2364,12 @@ class Slist(List[A]):
         >>> Slist([1]).permutations_pairs()
         Slist([])
         """
-        import itertools
         result = Slist(perm for perm in itertools.permutations(self, 2))
         return result
 
     def combinations_pairs(self) -> Slist[Tuple[A, A]]:
         """Generate pairs of elements without including reversed pairs.
-        
+
         This method uses itertools.combinations with length=2.
 
         Returns
@@ -2390,6 +2388,5 @@ class Slist(List[A]):
         >>> Slist([1]).combinations_pairs()
         Slist([])
         """
-        import itertools
         result = Slist(itertools.combinations(self, 2))
         return result
