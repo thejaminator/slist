@@ -50,18 +50,20 @@ def test_split_by():
         Slist([2, 4]),
         Slist([1, 3, 5]),
     ), "should split a non-empty Slist correctly into two Slists"
-    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: True) == (
-        Slist([1, 2, 3, 4, 5]),
-        Slist([]),
-    ), (
-        "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
-    )
-    assert Slist([1, 2, 3, 4, 5]).split_by(lambda x: False) == (
-        Slist([]),
-        Slist([1, 2, 3, 4, 5]),
-    ), (
-        "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
-    )
+    assert (
+        Slist([1, 2, 3, 4, 5]).split_by(lambda x: True)
+        == (
+            Slist([1, 2, 3, 4, 5]),
+            Slist([]),
+        )
+    ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
+    assert (
+        Slist([1, 2, 3, 4, 5]).split_by(lambda x: False)
+        == (
+            Slist([]),
+            Slist([1, 2, 3, 4, 5]),
+        )
+    ), "should split a non-empty Slist with an always True predicate with all elements in left Slist, and no elements on right Slist"
 
 
 def test_split_on():
@@ -99,6 +101,36 @@ def test_zip():
         Slist([1, 2, 3]).zip(Slist(["1"]))
     with pytest.raises(ValueError):
         Slist([1, 2, 3]).zip(Slist(["1", "2", "3"]), Slist(["1"]))
+
+
+def test_zip_cycle():
+    # Test empty lists
+    assert Slist([]).zip_cycle(Slist([])) == Slist([])
+    assert Slist([1, 2, 3]).zip_cycle(Slist([])) == Slist([])
+    assert Slist([]).zip_cycle(Slist([1, 2, 3])) == Slist([])
+
+    # Test first sequence longer
+    assert Slist([1, 2, 3]).zip_cycle(["a", "b"]) == Slist([(1, "a"), (2, "b"), (3, "a")])
+
+    # Test second sequence longer
+    assert Slist([1, 2]).zip_cycle(["a", "b", "c", "d"]) == Slist([(1, "a"), (2, "b"), (1, "c"), (2, "d")])
+
+    # Test equal length sequences
+    assert Slist([1, 2, 3]).zip_cycle(["a", "b", "c"]) == Slist([(1, "a"), (2, "b"), (3, "c")])
+
+    # Test with three sequences of different lengths
+    assert Slist([1, 2, 3]).zip_cycle(["a", "b"], [10, 20, 30, 40]) == Slist(
+        [(1, "a", 10), (2, "b", 20), (3, "a", 30), (1, "b", 40)]
+    )
+
+    # Test with single element cycling
+    assert Slist([1]).zip_cycle(["a", "b", "c"]) == Slist([(1, "a"), (1, "b"), (1, "c")])
+    assert Slist([1, 2, 3]).zip_cycle(["a"]) == Slist([(1, "a"), (2, "a"), (3, "a")])
+
+    # Test longer sequence to verify proper cycling
+    assert Slist([1, 2]).zip_cycle(["a", "b", "c", "d", "e", "f"]) == Slist(
+        [(1, "a"), (2, "b"), (1, "c"), (2, "d"), (1, "e"), (2, "f")]
+    )
 
 
 def test_take_until_inclusive():

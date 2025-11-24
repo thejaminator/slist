@@ -2272,6 +2272,66 @@ class Slist(List[A]):
         else:
             return Slist(zip(self, *others))
 
+    @overload
+    def zip_cycle(self, other: Sequence[B], /) -> Slist[Tuple[A, B]]: ...
+
+    @overload
+    def zip_cycle(self, other1: Sequence[B], other2: Sequence[C], /) -> Slist[Tuple[A, B, C]]: ...
+
+    @overload
+    def zip_cycle(
+        self, other1: Sequence[B], other2: Sequence[C], other3: Sequence[D], /
+    ) -> Slist[Tuple[A, B, C, D]]: ...
+
+    @overload
+    def zip_cycle(
+        self, other1: Sequence[B], other2: Sequence[C], other3: Sequence[D], other4: Sequence[E], /
+    ) -> Slist[Tuple[A, B, C, D, E]]: ...
+
+    def zip_cycle(self: Sequence[A], *others: Sequence[Any]) -> Slist[Tuple[Any, ...]]:
+        """Zip sequences by cycling shorter ones until all are exhausted.
+
+        Unlike regular zip which stops at the shortest sequence, zip_cycle
+        repeats shorter sequences cyclically until the longest sequence is exhausted.
+
+        Parameters
+        ----------
+        *others : Sequence[Any]
+            Other sequences to zip with
+
+        Returns
+        -------
+        Slist[Tuple[Any, ...]]
+            List of tuples containing elements from all sequences
+
+        Examples
+        --------
+        >>> Slist([1, 2, 3]).zip_cycle(['a', 'b'])
+        Slist([(1, 'a'), (2, 'b'), (3, 'a')])
+        >>> Slist([1, 2]).zip_cycle(['a', 'b', 'c', 'd'])
+        Slist([(1, 'a'), (2, 'b'), (1, 'c'), (2, 'd')])
+        >>> Slist([1, 2, 3]).zip_cycle(['a', 'b'], [10, 20, 30, 40])
+        Slist([(1, 'a', 10), (2, 'b', 20), (3, 'a', 30), (1, 'b', 40)])
+        """
+        all_sequences = [self] + list(others)
+        
+        # If any sequence is empty, return empty list
+        if any(len(seq) == 0 for seq in all_sequences):
+            return Slist()
+        
+        # Find the maximum length
+        max_len = max(len(seq) for seq in all_sequences)
+        
+        # Create cycled iterators for each sequence
+        cycled_iterators = [itertools.cycle(seq) for seq in all_sequences]
+        
+        # Zip them together for max_len items
+        result = []
+        for _ in range(max_len):
+            result.append(tuple(next(it) for it in cycled_iterators))
+        
+        return Slist(result)
+
     def slice_with_bool(self, bools: Sequence[bool]) -> Slist[A]:
         """Slice the list using a sequence of boolean values.
 
